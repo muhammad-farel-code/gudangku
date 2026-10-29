@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Daftarkan middleware keamanan respons headers ke grup web
+        $middleware->web(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
         // Alias middleware untuk route
         $middleware->alias([
             'role' => EnsureUserHasRole::class,
