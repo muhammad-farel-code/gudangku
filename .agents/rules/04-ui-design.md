@@ -1,0 +1,102 @@
+# UI Design Rules GudangKu (ALWAYS FOLLOW untuk semua pekerjaan tampilan)
+
+Referensi visual: docs/design/reference-dashboard.jpeg (dashboard inventori
+bergaya modern: sidebar gelap, panel konten putih membulat, aksen hijau lime).
+Tiru GAYA dan struktur layout-nya, BUKAN merek/teks/logonya. Nama aplikasi:
+GudangKu. Jangan memakai kata "vault", jangan membuat kartu "Upgrade Pro".
+
+## Batasan teknis
+- Bootstrap 5.3 (CDN) hanya untuk grid, utilitas, modal, dropdown, form.
+- Tampilan khas ditulis di SATU file: public/css/gudangku.css (CSS variables
+  + override). Dilarang template admin siap pakai atau package UI.
+- Ikon: Bootstrap Icons (CDN). Font: Outfit (Google Fonts CDN), fallback
+  system-ui, sans-serif. Grafik: Chart.js (CDN). Tanpa @vite.
+- Gauge setengah lingkaran dibuat sendiri dengan SVG sederhana (stroke-dasharray),
+  bukan library.
+
+## Design tokens (taruh sebagai CSS variables di :root)
+Warna (perkiraan dari gambar, boleh disetel mendekati):
+- --gk-bg:            #17171a   (latar luar / body)
+- --gk-sidebar:       #1d1d20   (sidebar)
+- --gk-sidebar-text:  #a6a6ad ; --gk-sidebar-active: #ffffff
+- --gk-panel:         #ffffff   (panel konten utama)
+- --gk-surface:       #f6f6f3   (latar kartu sekunder / input)
+- --gk-border:        #ececea
+- --gk-text:          #18181b ; --gk-muted: #7a7a83
+- --gk-accent:        #d8f23a   (lime, aksen utama) ; --gk-accent-dark: #b9d11f
+- --gk-dark-card:     #1d1d20   (kartu gelap pertama / tombol primer)
+- --gk-success: #2f9e5b ; --gk-warning: #f2b630 ; --gk-danger: #e5484d
+- Status chip memakai latar pastel (hijau/kuning/merah muda) + teks lebih gelap.
+Bentuk:
+- Radius: panel 24px, card 16px, tombol & chip & input search = pill (999px).
+- Shadow sangat halus (0 1px 2px rgba(0,0,0,.04)); utamakan border 1px.
+- Spasi lega: padding card 20-24px, gap grid 16px.
+Tipografi:
+- Judul halaman 28px/600; judul card 15px/600; angka statistik 28-32px/600;
+  label kecil 12-13px warna muted.
+
+## Struktur layout (layouts/app.blade.php)
+1. Body gelap (--gk-bg). Sidebar kiri gelap, lebar ~240px, sticky.
+   - Atas: logo kotak lime + teks "GudangKu".
+   - Grup label kecil kapital "MENU" lalu item; grup "GENERAL" (Profil, dll.).
+   - Item aktif: teks putih + penanda vertikal/indikator lime di kiri.
+   - Bawah: kartu user (avatar inisial, nama, role).
+2. Konten: SATU panel putih membulat besar di sebelah sidebar (margin kecil
+   dari tepi), berisi topbar + isi halaman.
+3. Topbar: judul halaman (kiri), search pill (tengah, opsional), tombol
+   filter ikon, ikon notifikasi, dan tombol aksi utama pill GELAP di kanan
+   (mis. "Tambah Produk +").
+4. Mobile (<992px): sidebar jadi offcanvas, panel konten penuh lebar.
+5. Flash message: alert membulat di atas konten, ikon + warna sesuai tipe.
+
+## Komponen
+- Stat card: ikon dalam kotak kecil membulat (lime pada kartu gelap), label
+  muted, angka besar, chip tren kecil ("+12% sejak bulan lalu" hanya bila
+  data nyata dihitung; jika tidak, tampilkan keterangan netral). Kartu
+  PERTAMA bergaya gelap (latar --gk-dark-card, teks putih, ikon lime).
+- Tombol primer = pill gelap teks putih; sekunder = pill outline border;
+  aksen lime dipakai untuk hover/fokus, ikon aktif, dan highlight data.
+- Tabel: tanpa garis vertikal, header muted 12px kapital ringan, baris tinggi
+  nyaman, hover lembut, kolom aksi berisi ikon (lihat/ubah/hapus), avatar/thumb
+  inisial kecil untuk nama produk.
+- Tab filter berbentuk chip pill di atas tabel (aktif = gelap/putih, lain =
+  outline). Dipakai untuk filter cepat (Semua | Stok Aman | Menipis | Habis).
+- Badge status stok: Aman (hijau pastel), Menipis (kuning pastel), Habis
+  (merah muda). Selalu teks + warna (bukan warna saja).
+- Form: input membulat 12px, label di atas, error merah di bawah field,
+  tombol simpan pill gelap + tombol batal outline.
+- Grafik Chart.js: garis halus (tension .4) berwarna lime-gelap dengan
+  gradient area lime pucat di bawahnya; grid horizontal tipis; tooltip
+  gelap membulat; dua seri (Stok Masuk = lime, Stok Keluar = abu gelap).
+- Empty state: ikon besar pucat + teks singkat + tombol aksi.
+- Modal konfirmasi hapus: bersih, tombol Hapus merah pill.
+
+## Pemetaan gambar -> GudangKu (JANGAN menambah fitur di luar ini)
+Menu sidebar (sesuai role): Dashboard, Produk, Kategori, Pemasok,
+Stok Masuk, Stok Keluar, Penyesuaian (manager/admin), Riwayat Transaksi,
+Laporan (manager/admin), Pengguna (admin), Activity Log (admin).
+GENERAL: Profil, Logout.
+
+Dashboard (mengikuti susunan gambar):
+- Baris 1 (4 stat card): [gelap] Total Produk | Total Unit Stok |
+  Nilai Persediaan (disembunyikan untuk staff, ganti "Transaksi Hari Ini") |
+  Stok Menipis (boleh pakai gauge setengah lingkaran: persen produk menipis).
+- Baris 2 kiri (lebar): grafik area "Stok Masuk vs Keluar" 14 hari, dengan
+  tooltip. Kanan: tabel "Produk per Kategori / Stok Menipis" dengan tab chip.
+- Baris 3 (3 card): "Transaksi Terbaru" (tabel kecil + tipe IN/OUT berwarna) |
+  "Rekomendasi Restock" = daftar produk dengan stock <= min_stock beserta
+  saran jumlah (min_stock*2 - stock); BERBASIS ATURAN, jangan diberi label
+  AI | "Stok Habis" (produk stock = 0) dengan tombol "Stok Masuk".
+Halaman Produk meniru "Inventory" di gambar: header + search + filter +
+tombol "Tambah Produk", tabel produk dengan thumb inisial, kolom SKU,
+kategori, stok, harga, status, aksi.
+
+## Hal yang DILARANG
+- Menyalin logo, nama, atau teks merek dari gambar referensi.
+- Menambah modul yang tidak ada di scope (Shipment, Customers, Store,
+  AI Assistant, upgrade/premium).
+- Data palsu hardcode di view. Semua angka dari database (placeholder hanya
+  di Fase 3, wajib diganti di Fase 6).
+- Logika bisnis atau query di Blade. Output user tetap {{ }} (tanpa {!! !!}).
+- Menurunkan keterbacaan: kontras teks minimal AA, ukuran teks isi >= 14px.
+- Menghabiskan waktu pada animasi/efek. Prioritaskan konsistensi komponen.

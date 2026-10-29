@@ -7,64 +7,56 @@
     <!-- Bootstrap 5.3 CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    <!-- Google Fonts: Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="{{ asset('css/gudangku.css') }}" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background-color: var(--gk-bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #334155;
             padding: 1.5rem;
         }
-        .error-card {
+        .gk-error-card {
             background: #ffffff;
-            border-radius: 1rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            max-width: 520px;
+            border-radius: var(--gk-radius-panel);
+            box-shadow: var(--gk-shadow-panel);
+            max-width: 480px;
             width: 100%;
             text-align: center;
             padding: 3rem 2rem;
         }
-        .error-code {
+        .gk-error-code {
             font-size: 5rem;
             font-weight: 800;
-            color: #e11d48;
+            color: var(--gk-danger);
             line-height: 1;
-        }
-        .error-icon {
-            font-size: 4rem;
-            color: #f43f5e;
-            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
-    <main class="error-card">
-        <div class="error-icon">
+    <main class="gk-error-card">
+        <div style="font-size: 3.5rem; color: var(--gk-danger);" class="mb-2">
             <i class="bi bi-shield-slash-fill"></i>
         </div>
-        <div class="error-code">403</div>
-        <h1 class="h4 fw-bold text-dark mt-2 mb-2">Akses Dilarang (Forbidden)</h1>
-        <p class="text-secondary mb-4">
-            {{ $exception->getMessage() ?: 'Maaf, akun Anda tidak memiliki hak akses atau izin yang cukup untuk membuka halaman ini.' }}
+        <div class="gk-error-code mb-2">403</div>
+        <h1 class="h4 fw-bold text-dark mb-2">Akses Ditolak (Forbidden)</h1>
+        <p class="text-muted small mb-4">
+            {{ $exception->getMessage() ?: 'Akun Anda tidak memiliki izin atau peran (role) yang sesuai untuk mengakses modul ini.' }}
         </p>
 
         @auth
-            <div class="alert alert-light border small text-muted mb-4 py-2">
-                Masuk sebagai: <strong>{{ Auth::user()->name }}</strong> (Role: <span class="badge bg-secondary text-uppercase">{{ Auth::user()->role }}</span>)
+            <div class="p-2 px-3 rounded-3 small text-muted mb-4" style="background-color: var(--gk-surface); border: 1px solid var(--gk-border);">
+                Masuk sebagai: <strong>{{ Auth::user()->name }}</strong> (Role: <span class="badge bg-dark text-uppercase ms-1">{{ Auth::user()->role }}</span>)
             </div>
         @endauth
 
         <div class="d-flex justify-content-center gap-2">
-            <a href="javascript:history.back()" class="btn btn-outline-secondary px-3">
+            <a href="javascript:history.back()" class="btn btn-gk-outline px-4">
                 <i class="bi bi-arrow-left me-1"></i> Kembali
             </a>
-            <a href="{{ route('dashboard') }}" class="btn btn-primary px-4">
-                <i class="bi bi-speedometer2 me-1"></i> Ke Dashboard
+            <a href="{{ route('dashboard') }}" class="btn btn-gk-dark px-4">
+                <i class="bi bi-grid-1x2-fill me-1"></i> Dashboard
             </a>
         </div>
     </main>
