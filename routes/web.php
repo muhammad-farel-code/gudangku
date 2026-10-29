@@ -58,6 +58,28 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/stock/out', [\App\Http\Controllers\StockOutController::class, 'create'])->name('stock.out');
     Route::post('/stock/out', [\App\Http\Controllers\StockOutController::class, 'store'])->name('stock.out.store');
 
+    // --- Profil Pengguna (Semua role login) ---
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // --- Laporan Inventaris & Transaksi (Khusus Manager & Admin) ---
+    Route::middleware('role:admin,manager')->group(function () {
+        Route::get('/reports/stock', [\App\Http\Controllers\ReportController::class, 'stock'])->name('reports.stock');
+        Route::get('/reports/stock/export', [\App\Http\Controllers\ReportController::class, 'exportStock'])->name('reports.stock.export');
+        Route::get('/reports/stock/print', [\App\Http\Controllers\ReportController::class, 'printStock'])->name('reports.stock.print');
+
+        Route::get('/reports/transactions', [\App\Http\Controllers\ReportController::class, 'transactions'])->name('reports.transactions');
+        Route::get('/reports/transactions/export', [\App\Http\Controllers\ReportController::class, 'exportTransactions'])->name('reports.transactions.export');
+        Route::get('/reports/transactions/print', [\App\Http\Controllers\ReportController::class, 'printTransactions'])->name('reports.transactions.print');
+    });
+
+    // --- Manajemen Pengguna & Audit Trail (Khusus Admin) ---
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('users', \App\Http\Controllers\UserController::class);
+        Route::get('/activity-logs', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('activity-logs.index');
+    });
+
     // --- Riwayat & Detail Transaksi (Read-Only / Immutable: Semua role login) ---
     Route::get('/transactions', [\App\Http\Controllers\StockTransactionController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{stockTransaction}', [\App\Http\Controllers\StockTransactionController::class, 'show'])->name('transactions.show');
