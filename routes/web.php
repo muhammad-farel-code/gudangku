@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -31,4 +34,16 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // --- Master Data (CUD: Hanya Manager & Admin) ---
+    Route::middleware('role:admin,manager')->group(function () {
+        Route::resource('categories', CategoryController::class)->except(['index', 'show']);
+        Route::resource('suppliers', SupplierController::class)->except(['index', 'show']);
+        Route::resource('products', ProductController::class)->except(['index', 'show']);
+    });
+
+    // --- Master Data (Read: Semua role login) ---
+    Route::resource('categories', CategoryController::class)->only(['index', 'show']);
+    Route::resource('suppliers', SupplierController::class)->only(['index', 'show']);
+    Route::resource('products', ProductController::class)->only(['index', 'show']);
 });
