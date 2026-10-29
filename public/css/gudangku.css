@@ -1,0 +1,827 @@
+/* ==========================================================================
+   GudangKu - Modern Inventory Design System
+   Visual Style: Inspired by dark sidebar, floating white rounded panel,
+                 dark pill buttons, and lime green (#d8f23a) accents.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Color Palette */
+    --gk-bg:             #17171a;  /* Dark outer background / canvas */
+    --gk-sidebar:        #1d1d20;  /* Sleek dark sidebar */
+    --gk-sidebar-text:   #8e8e96;  /* Sidebar muted text */
+    --gk-sidebar-hover:  #28282d;  /* Sidebar hover item */
+    --gk-sidebar-active: #ffffff;  /* Sidebar active text */
+    --gk-panel:          #ffffff;  /* Main floating white canvas */
+    --gk-surface:        #f6f6f4;  /* Card surface / light input */
+    --gk-surface-hover:  #eeeeea;
+    --gk-border:         #ececea;  /* Ultra subtle light borders */
+    --gk-border-dark:    #2a2a2f;  /* Sidebar borders */
+    --gk-text:           #18181b;  /* Primary dark text */
+    --gk-muted:          #71717a;  /* Secondary muted text */
+    
+    /* Accents */
+    --gk-accent:         #d8f23a;  /* Vibrant lime green */
+    --gk-accent-dark:    #b5cd28;
+    --gk-accent-glow:    rgba(216, 242, 58, 0.25);
+    --gk-dark-card:      #1d1d20;  /* First stat card & primary dark button */
+    
+    /* Status Colors */
+    --gk-success:        #2f9e5b;
+    --gk-success-bg:     #eaf7ef;
+    --gk-warning:        #f2b630;
+    --gk-warning-bg:     #fef7e6;
+    --gk-danger:         #e5484d;
+    --gk-danger-bg:      #fdeced;
+    --gk-info:           #3b82f6;
+    --gk-info-bg:        #eff6ff;
+
+    /* Radii */
+    --gk-radius-panel:   24px;
+    --gk-radius-card:    18px;
+    --gk-radius-sm:      12px;
+    --gk-radius-pill:    999px;
+
+    /* Shadows */
+    --gk-shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
+    --gk-shadow-panel:   0 20px 40px -15px rgba(0, 0, 0, 0.35);
+}
+
+/* Base Reset & Typography */
+body {
+    font-family: 'Outfit', system-ui, -apple-system, sans-serif;
+    background-color: var(--gk-bg);
+    color: var(--gk-text);
+    min-height: 100vh;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   App Layout (Sidebar + Floating Panel)
+   -------------------------------------------------------------------------- */
+.app-wrapper {
+    display: flex;
+    min-height: 100vh;
+    padding: 14px 14px 14px 0;
+}
+
+@media (max-width: 991.98px) {
+    .app-wrapper {
+        padding: 10px;
+    }
+}
+
+/* Sidebar */
+.gk-sidebar {
+    width: 250px;
+    min-width: 250px;
+    background-color: var(--gk-bg);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.gk-sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px 24px;
+    text-decoration: none;
+    color: #ffffff;
+}
+
+.gk-brand-logo {
+    width: 36px;
+    height: 36px;
+    background-color: var(--gk-accent);
+    color: #17171a;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.gk-brand-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+}
+
+.gk-menu-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #55555c;
+    padding: 14px 12px 6px;
+    margin: 0;
+}
+
+.gk-sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.gk-sidebar-nav .nav-item {
+    margin-bottom: 3px;
+}
+
+.gk-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    color: var(--gk-sidebar-text);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.15s ease-in-out;
+}
+
+.gk-sidebar-link i {
+    font-size: 1.15rem;
+    color: #71717a;
+    transition: color 0.15s ease;
+}
+
+.gk-sidebar-link:hover {
+    color: #ffffff;
+    background-color: var(--gk-sidebar-hover);
+}
+
+.gk-sidebar-link:hover i {
+    color: var(--gk-accent);
+}
+
+.gk-sidebar-link.active {
+    color: var(--gk-sidebar-active);
+    background-color: #232328;
+    font-weight: 600;
+}
+
+.gk-sidebar-link.active i {
+    color: var(--gk-accent);
+}
+
+.gk-sidebar-link.active::before {
+    content: '';
+    position: absolute;
+    left: -18px;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background-color: var(--gk-accent);
+    border-radius: 0 4px 4px 0;
+}
+
+/* Sidebar User Footer */
+.gk-sidebar-footer {
+    padding-top: 16px;
+    border-top: 1px solid var(--gk-border-dark);
+}
+
+.gk-user-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background-color: #202025;
+    color: #ffffff;
+    text-decoration: none;
+}
+
+.gk-user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: var(--gk-accent);
+    color: #17171a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.gk-user-info {
+    overflow: hidden;
+    line-height: 1.25;
+    flex-grow: 1;
+}
+
+.gk-user-name {
+    font-size: 0.86rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #ffffff;
+}
+
+.gk-user-role {
+    font-size: 0.72rem;
+    color: #8e8e96;
+    text-transform: capitalize;
+}
+
+/* --------------------------------------------------------------------------
+   Floating White Content Panel
+   -------------------------------------------------------------------------- */
+.gk-main-panel {
+    flex-grow: 1;
+    background-color: var(--gk-panel);
+    border-radius: var(--gk-radius-panel);
+    box-shadow: var(--gk-shadow-panel);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 28px);
+    overflow: hidden;
+    padding: 24px 28px;
+}
+
+@media (max-width: 991.98px) {
+    .gk-main-panel {
+        border-radius: 16px;
+        padding: 16px;
+        min-height: 100vh;
+    }
+}
+
+/* Topbar Header */
+.gk-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.gk-page-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--gk-text);
+    margin: 0;
+}
+
+.gk-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Search Pill Input */
+.gk-search-box {
+    position: relative;
+    width: 280px;
+}
+
+.gk-search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gk-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+}
+
+.gk-search-input {
+    width: 100%;
+    height: 42px;
+    padding: 8px 16px 8px 38px;
+    background-color: var(--gk-surface);
+    border: 1px solid transparent;
+    border-radius: var(--gk-radius-pill);
+    font-size: 0.88rem;
+    color: var(--gk-text);
+    transition: all 0.2s ease;
+}
+
+.gk-search-input:focus {
+    outline: none;
+    background-color: #ffffff;
+    border-color: #d4d4d8;
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
+}
+
+.gk-search-input::placeholder {
+    color: #a1a1aa;
+}
+
+/* Circle / Pill Icon Buttons */
+.gk-btn-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background-color: var(--gk-surface);
+    border: 1px solid transparent;
+    color: var(--gk-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.15s ease;
+    position: relative;
+    text-decoration: none;
+}
+
+.gk-btn-icon:hover {
+    background-color: var(--gk-surface-hover);
+    color: #000;
+}
+
+.gk-notification-dot {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 7px;
+    height: 7px;
+    background-color: var(--gk-danger);
+    border-radius: 50%;
+    border: 1.5px solid #ffffff;
+}
+
+/* Primary Dark Pill Button */
+.btn-gk-dark {
+    background-color: var(--gk-dark-card);
+    color: #ffffff;
+    border: 1px solid var(--gk-dark-card);
+    border-radius: var(--gk-radius-pill);
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-gk-dark:hover {
+    background-color: #27272c;
+    border-color: #27272c;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.btn-gk-dark .btn-icon-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+}
+
+/* Outline Pill Button */
+.btn-gk-outline {
+    background-color: transparent;
+    color: var(--gk-text);
+    border: 1px solid var(--gk-border);
+    border-radius: var(--gk-radius-pill);
+    padding: 8px 18px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.btn-gk-outline:hover {
+    background-color: var(--gk-surface);
+    color: #000;
+    border-color: #d4d4d8;
+}
+
+/* --------------------------------------------------------------------------
+   Cards & Stats
+   -------------------------------------------------------------------------- */
+.gk-card {
+    background-color: #ffffff;
+    border: 1px solid var(--gk-border);
+    border-radius: var(--gk-radius-card);
+    padding: 22px;
+    box-shadow: var(--gk-shadow-sm);
+    transition: box-shadow 0.2s ease;
+}
+
+.gk-card-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gk-text);
+    margin-bottom: 0;
+}
+
+/* First Dark Stat Card (Inspired by reference image) */
+.gk-stat-card-dark {
+    background-color: var(--gk-dark-card);
+    color: #ffffff;
+    border: 1px solid #2a2a30;
+    border-radius: var(--gk-radius-card);
+    padding: 22px;
+    position: relative;
+    overflow: hidden;
+}
+
+.gk-stat-card-dark .gk-stat-icon-wrap {
+    width: 44px;
+    height: 44px;
+    background-color: #27272c;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gk-accent);
+    font-size: 1.35rem;
+}
+
+.gk-stat-card-dark .gk-stat-label {
+    color: #a1a1aa;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+.gk-stat-card-dark .gk-stat-value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.1;
+}
+
+.gk-stat-card-dark .gk-stat-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #71717a;
+    font-size: 1.25rem;
+}
+
+/* Light Stat Card */
+.gk-stat-card-light {
+    background-color: #ffffff;
+    border: 1px solid var(--gk-border);
+    border-radius: var(--gk-radius-card);
+    padding: 22px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.gk-stat-card-light:hover {
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.05);
+}
+
+.gk-stat-card-light .gk-stat-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+.gk-stat-card-light .gk-stat-label {
+    color: var(--gk-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 14px;
+    margin-bottom: 4px;
+}
+
+.gk-stat-card-light .gk-stat-value {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: var(--gk-text);
+    line-height: 1.1;
+}
+
+.gk-stat-card-light .gk-stat-arrow {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: #a1a1aa;
+    font-size: 1.25rem;
+}
+
+/* Pill Trend Badges */
+.gk-trend-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--gk-radius-pill);
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.gk-trend-up {
+    background-color: var(--gk-success-bg);
+    color: var(--gk-success);
+}
+
+.gk-trend-down {
+    background-color: var(--gk-danger-bg);
+    color: var(--gk-danger);
+}
+
+.gk-trend-subtext {
+    font-size: 0.74rem;
+    color: var(--gk-muted);
+    margin-left: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   Half-Circle SVG Gauge (From reference visual)
+   -------------------------------------------------------------------------- */
+.gk-gauge-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 90px;
+    height: 52px;
+}
+
+.gk-gauge-svg {
+    width: 90px;
+    height: 45px;
+}
+
+.gk-gauge-center-text {
+    position: absolute;
+    bottom: 0;
+    text-align: center;
+    line-height: 1;
+}
+
+.gk-gauge-pct {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gk-text);
+}
+
+.gk-gauge-sub {
+    font-size: 0.62rem;
+    color: var(--gk-muted);
+    display: block;
+}
+
+/* --------------------------------------------------------------------------
+   Filter Chips / Tabs
+   -------------------------------------------------------------------------- */
+.gk-chips-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.gk-chip {
+    padding: 6px 16px;
+    border-radius: var(--gk-radius-pill);
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--gk-text);
+    background-color: var(--gk-surface);
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gk-chip:hover {
+    background-color: var(--gk-surface-hover);
+    color: #000;
+}
+
+.gk-chip.active {
+    background-color: var(--gk-dark-card);
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Tables (Clean, High Rows, Borderless Verticals)
+   -------------------------------------------------------------------------- */
+.table-gk-wrapper {
+    overflow-x: auto;
+}
+
+.table-gk {
+    width: 100%;
+    margin-bottom: 0;
+    vertical-align: middle;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table-gk th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gk-muted);
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--gk-border);
+    background-color: transparent;
+}
+
+.table-gk td {
+    padding: 14px 16px;
+    font-size: 0.88rem;
+    color: var(--gk-text);
+    border-bottom: 1px solid var(--gk-border);
+    background-color: transparent;
+}
+
+.table-gk tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.table-gk tbody tr:hover td {
+    background-color: #fafaf8;
+}
+
+.table-gk tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Thumb Initial Avatar in Tables */
+.gk-thumb-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background-color: var(--gk-surface);
+    color: var(--gk-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* Status Badges */
+.badge-status {
+    padding: 4px 10px;
+    border-radius: var(--gk-radius-pill);
+    font-size: 0.74rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.badge-status::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.badge-status-safe {
+    background-color: var(--gk-success-bg);
+    color: #1b6338;
+}
+.badge-status-safe::before {
+    background-color: var(--gk-success);
+}
+
+.badge-status-warning {
+    background-color: var(--gk-warning-bg);
+    color: #96680a;
+}
+.badge-status-warning::before {
+    background-color: var(--gk-warning);
+}
+
+.badge-status-danger {
+    background-color: var(--gk-danger-bg);
+    color: #a6282d;
+}
+.badge-status-danger::before {
+    background-color: var(--gk-danger);
+}
+
+/* Action Icons */
+.gk-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: #a1a1aa;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    text-decoration: none;
+}
+
+.gk-action-btn:hover {
+    color: var(--gk-text);
+    background-color: var(--gk-surface);
+}
+
+.gk-action-btn.btn-delete:hover {
+    color: var(--gk-danger);
+    background-color: var(--gk-danger-bg);
+}
+
+/* --------------------------------------------------------------------------
+   Forms & Controls
+   -------------------------------------------------------------------------- */
+.form-label-gk {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gk-muted);
+    margin-bottom: 6px;
+}
+
+.form-control-gk, .form-select-gk {
+    border-radius: var(--gk-radius-sm);
+    border: 1px solid var(--gk-border);
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    background-color: #ffffff;
+    color: var(--gk-text);
+    transition: all 0.2s ease;
+}
+
+.form-control-gk:focus, .form-select-gk:focus {
+    border-color: #18181b;
+    box-shadow: 0 0 0 3px rgba(24, 24, 27, 0.08);
+    outline: none;
+}
+
+/* --------------------------------------------------------------------------
+   Flash Alerts
+   -------------------------------------------------------------------------- */
+.alert-gk {
+    border: 1px solid transparent;
+    border-radius: var(--gk-radius-sm);
+    padding: 12px 18px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.alert-gk-success {
+    background-color: var(--gk-success-bg);
+    border-color: #d1fae5;
+    color: #065f46;
+}
+
+.alert-gk-danger {
+    background-color: var(--gk-danger-bg);
+    border-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* --------------------------------------------------------------------------
+   Mobile Offcanvas / Toggle
+   -------------------------------------------------------------------------- */
+.gk-mobile-toggle {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--gk-text);
+    font-size: 1.5rem;
+    padding: 0;
+}
+
+@media (max-width: 991.98px) {
+    .gk-sidebar {
+        display: none;
+    }
+    .gk-mobile-toggle {
+        display: block;
+    }
+}
