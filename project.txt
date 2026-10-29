@@ -1,0 +1,1643 @@
+################################################################################
+#                                                                              #
+#   PROJECT PLAN - UAS WEB APPLICATION DEVELOPMENT (WAD04)                     #
+#   GudangKu - Sistem Manajemen Inventaris Gudang                              #
+#   Universitas Cakrawala | Individual | Deadline: Minggu, 1 Nov 2026 23.59 WIB #
+#                                                                              #
+################################################################################
+
+Dokumen ini adalah "single source of truth" untuk mengerjakan UAS.
+Isinya: analisis soal, tech stack, fitur, database, arsitektur, keamanan,
+rules untuk AI di Antigravity, prompt per fase, deployment, README, rencana
+video + PDF, persiapan esai, timeline, dan checklist final.
+
+CARA PAKAI (singkat):
+  1. Baca Bagian 0 dan 1 dulu (catatan penting + peta rubrik).
+  2. Taruh isi Bagian 13 ke folder .agents/rules/ di project (rules AI).
+  3. Kerjakan fase demi fase memakai prompt di Bagian 14. SATU FASE = SATU
+     CHAT/CONVERSATION BARU di Antigravity. Commit setelah tiap fase.
+  4. Setelah tiap fase, WAJIB minta AI menjelaskan kodenya (prompt "EXPLAIN"),
+     karena kamu harus bisa menjelaskan SETIAP baris di video esai.
+  5. Centang checklist di Bagian 21 sebelum submit.
+
+
+================================================================================
+DAFTAR ISI
+================================================================================
+  0.  Catatan penting (baca dulu!)
+  1.  Peta rubrik -> bukti yang harus ada (target nilai maksimal)
+  2.  Tech stack & versi
+  3.  Fitur (prioritas P0/P1/P2) + business rules
+  4.  Role & hak akses (RBAC matrix)
+  5.  Desain database (ERD, tabel, constraint, seeder)
+  6.  Arsitektur aplikasi (MVC + layer, request lifecycle, struktur folder)
+  7.  Routing (tabel route lengkap)
+  8.  Keamanan (CSRF, XSS, SQLi, session, auth, RBAC, hardening)
+  9.  Validasi & error handling
+  10. Daftar halaman UI
+  11. Rencana testing
+  12. Git workflow & rencana commit
+  13. RULES untuk AI Antigravity (copy ke .agents/rules/)
+  14. PROMPT PACK per fase (copy-paste ke Antigravity)
+  15. Deployment ke Railway (step by step) + env vars
+  16. Template README.md
+  17. Template .env.example
+  18. Deliverables: PDF presentasi, PDF final submission, script video
+  19. Persiapan esai (pertanyaan antisipasi + poin jawaban)
+  20. Timeline 29 Okt - 1 Nov 2026
+  21. Checklist final sebelum submit
+  22. Troubleshooting umum
+
+
+================================================================================
+0. CATATAN PENTING (BACA DULU)
+================================================================================
+
+[0.1] SISA WAKTU SANGAT PENDEK
+  Hari ini Kamis, 29 Okt 2026. Deadline Minggu, 1 Nov 2026 pukul 23.59 WIB.
+  Artinya efektif sekitar 3,5 hari, bukan 7 hari. Karena itu fitur dibagi
+  P0 (wajib, menjamin nilai), P1 (nilai tambah), P2 (opsional). Kerjakan P0
+  sampai tuntas dan BERSIH dulu. Jangan mulai P1/P2 sebelum P0 stabil dan
+  ter-deploy. Target submit: Minggu sore (jam 18.00), bukan jam 23.50.
+
+[0.2] SOAL MEMAKAI DUA KASUS, KAMU PILIH GUDANG
+  Judul soal: pilih "Sistem Manajemen Inventaris Gudang" ATAU "E-Commerce UMKM".
+  Teks "Background/Context" di soal menyebut aplikasi pencatatan finansial
+  (penghasilan, pengeluaran, dashboard ringkasan). Itu tampaknya sisa teks
+  dari template soal. Ikuti pilihan kasus di Judul (Inventaris Gudang).
+  Dashboard ringkasan tetap kita buat, jadi semangat "dashboard ringkasan"
+  dari teks itu tetap terpenuhi. Kalau ragu, tanyakan ke dosen/asisten dan
+  simpan buktinya (screenshot chat).
+
+[0.3] PERTANYAAN ESAI BELUM TERLIHAT
+  Soal menulis "Esai: Document Link" (link dokumen terpisah) dan esai
+  DIJAWAB DALAM VIDEO. Isi pertanyaan di link itu tidak ada di PDF.
+  TODO: buka link tersebut, salin semua pertanyaannya, lalu cocokkan dengan
+  Bagian 19. Bobot esai 25%, jadi jangan dianggap remeh.
+
+[0.4] ATURAN YANG BISA BIKIN NILAI JEBLOK
+  - DILARANG template boilerplate instan / generator kode otomatis pihak
+    ketiga. Jadi: JANGAN pakai Laravel Breeze, Jetstream, Fortify starter,
+    Filament, Backpack, Voyager, AdminLTE generator, atau template "deploy
+    Laravel starter" di Railway. Autentikasi ditulis MANUAL (AuthController
+    sendiri). UI pakai Bootstrap via CDN yang ditulis sendiri di Blade.
+    `laravel new` menanyakan starter kit: pilih NONE (atau pakai
+    `composer create-project laravel/laravel`).
+  - Database WAJIB MySQL (bukan SQLite, bukan PostgreSQL), termasuk di
+    production dan di test.
+  - Individual. Orisinalitas dicek lewat esai + commit history Git. Jadi
+    commit SERING dan bertahap sejak awal (lihat Bagian 12). Jangan
+    upload satu commit besar di akhir.
+  - AI boleh dipakai, tetapi KAMU WAJIB paham semua baris kode.
+  - Penamaan file submit: nim-nama-aplikasi (contoh: 2025xxxx-NamaKamu-GudangKu).
+  - Submit via Google Form (link ada di soal), 1 file PDF final.
+
+[0.5] YANG PERLU KAMU ISI SENDIRI (placeholder di dokumen ini)
+  NIM, NAMA, link GitHub, link live app, link video. Cari kata "TODO".
+
+
+================================================================================
+1. PETA RUBRIK -> BUKTI YANG HARUS ADA
+================================================================================
+
+Rubrik menilai OUTPUT yang terlihat. Pastikan tiap baris ini punya bukti
+konkret (file/screenshot/penjelasan).
+
++----+--------------------------+-------+----------------------------------------------+
+| No | Parameter (bobot)        | CPMK  | Bukti yang akan kita siapkan                 |
++----+--------------------------+-------+----------------------------------------------+
+| 1  | Perancangan & Arsitektur | 1     | ERD (8 tabel, relasi jelas), diagram alur    |
+|    | fullstack (15%)          |       | arsitektur/request lifecycle, tabel routing, |
+|    |                          |       | struktur folder MVC -> semua ada di PDF      |
++----+--------------------------+-------+----------------------------------------------+
+| 2  | Implementasi web &       | 2,3   | Source code Laravel rapi, migrations,        |
+|    | database (35%)           |       | seeders, Eloquent (relasi, scope, eager      |
+|    |                          |       | loading) + Query Builder (dashboard/laporan),|
+|    |                          |       | CRUD penuh 4 entitas, StockService atomik,   |
+|    |                          |       | file .sql                                    |
++----+--------------------------+-------+----------------------------------------------+
+| 3  | Keamanan web & session   | 4     | Validasi Form Request, @csrf, Blade escape   |
+|    | (15%)                    |       | (XSS) + strip_tags, prepared statements,     |
+|    |                          |       | auth manual, session DB + regenerate/        |
+|    |                          |       | invalidate, RBAC (middleware + Policy),      |
+|    |                          |       | throttle login, security headers             |
++----+--------------------------+-------+----------------------------------------------+
+| 4  | Deployment live app (10%)| 5     | URL Railway aktif + MySQL, langkah deploy    |
+|    |                          |       | tertulis (PDF + README), env vars            |
++----+--------------------------+-------+----------------------------------------------+
+| 5  | Esai via video (25%)     | 1-5   | Video: alur data, MVC, struktur DB; logika   |
+|    |                          |       | backend, error handling, sekuriti;           |
+|    |                          |       | deployment, env config, troubleshooting      |
++----+--------------------------+-------+----------------------------------------------+
+
+Strategi nilai: bobot terbesar ada di implementasi (35%) dan esai (25%).
+Kode yang jalan + kamu bisa menjelaskannya = 60% nilai. Maka kualitas kode
+dan pemahaman lebih penting daripada jumlah fitur.
+
+
+================================================================================
+2. TECH STACK & VERSI
+================================================================================
+
+Backend      : PHP (versi sesuai requirement Laravel yang terpasang; Laravel
+               terbaru saat ini butuh PHP 8.3+, cek `composer.json`)
+Framework    : Laravel (versi stabil terbaru dari `composer create-project`).
+               Per Okt 2026 Laravel 13.x sudah rilis; Laravel 12 juga masih
+               aman. Apa pun yang terpasang, JANGAN ubah di tengah jalan.
+Database     : MySQL 8+ (lokal: XAMPP/Laragon/Docker; production: MySQL di
+               Railway). Charset utf8mb4, collation utf8mb4_unicode_ci.
+ORM          : Eloquent (CRUD, relasi) + Query Builder (agregasi dashboard).
+View         : Blade Template Engine (server-side rendering, MVC).
+Frontend     : Bootstrap 5.3 (CDN), Bootstrap Icons (CDN), Chart.js (CDN),
+               sedikit JavaScript vanilla (konfirmasi hapus, validasi UI,
+               format angka). TANPA bundler wajib (tidak pakai @vite di layout)
+               supaya deploy ringan dan penjelasan sederhana.
+Auth         : Manual dengan Auth facade (Auth::attempt, session guard).
+Session      : SESSION_DRIVER=database (tabel `sessions`) -> bisa dijelaskan
+               sebagai manajemen session yang persisten.
+Testing      : PHPUnit (bawaan Laravel) + database MySQL terpisah `gudangku_test`.
+Version ctrl : Git + GitHub (public repo, atau private + akses untuk dosen).
+Deployment   : Railway (app + MySQL service). Plan B: Render (Docker) dengan
+               MySQL eksternal, atau VPS. Vercel TIDAK cocok (PHP + MySQL).
+IDE / AI     : Antigravity IDE (agent-first). Mode disarankan: agent-assisted /
+               review-driven (agent minta review dulu sebelum aksi besar).
+Package tambahan : TIDAK ADA (0 package pihak ketiga di composer require).
+               Ini sengaja: lebih mudah dijelaskan, aman dari aturan "dilarang
+               generator/boilerplate". Export CSV ditulis manual (fputcsv).
+
+
+================================================================================
+3. FITUR + BUSINESS RULES
+================================================================================
+
+NAMA APLIKASI : GudangKu
+TAGLINE       : Sistem manajemen inventaris gudang: stok masuk, stok keluar,
+                opname, dan laporan, dengan kontrol akses berbasis peran.
+DESKRIPSI     : Aplikasi web server-side (Laravel, MVC, MySQL) untuk mencatat
+                master barang, kategori, pemasok, serta seluruh pergerakan
+                stok (masuk, keluar, penyesuaian) dengan jejak audit dan
+                dashboard ringkasan. Akses dibatasi 3 peran: Admin, Manager,
+                Staff.
+
+--- PRIORITAS ---
+P0 = wajib (menjamin nilai).  P1 = nilai tambah.  P2 = hanya kalau waktu sisa.
+
+[A] AUTENTIKASI & SESI (P0)
+  A1. Registrasi (nama, email, password + konfirmasi). Role otomatis `staff`
+      (role TIDAK PERNAH diambil dari input).
+  A2. Login (email + password), pesan error generik, regenerate session,
+      throttle 5x/menit per email+IP.
+  A3. Logout (POST, invalidate session, regenerate CSRF token).
+  A4. User nonaktif (`is_active=false`) tidak bisa login / langsung ditendang.
+  A5. Profil: ubah nama, ubah password (butuh password lama).   (P1)
+
+[B] DASHBOARD (P0)
+  B1. Kartu ringkasan: total produk, total unit stok, nilai persediaan
+      (SUM stock x purchase_price), jumlah produk stok menipis.
+  B2. Tabel "Stok Menipis" (stock <= min_stock).
+  B3. Grafik Chart.js: stok masuk vs keluar 7/14 hari terakhir.      (P1)
+  B4. 5-10 transaksi terbaru.
+  Isi dashboard menyesuaikan role (staff tidak melihat nilai persediaan).
+
+[C] MASTER DATA - CRUD PENUH (P0)
+  C1. Kategori: index (search+paging), create, show/edit, update, delete.
+  C2. Pemasok (supplier): CRUD penuh.
+  C3. Produk: CRUD penuh + search (nama/SKU) + filter kategori + filter
+      "stok menipis" + pagination + badge status stok. Stok awal lewat
+      `initial_stock` yang otomatis membuat transaksi "Stok awal".
+  C4. Manajemen user (admin): CRUD, ubah role, aktif/nonaktif, reset password.
+
+[D] TRANSAKSI STOK (P0)
+  D1. Stok Masuk (IN): pilih produk, qty, pemasok, tanggal, no. referensi
+      (auto), catatan. Stok produk bertambah.
+  D2. Stok Keluar (OUT): pilih produk, qty, penerima/tujuan, tanggal, catatan.
+      Ditolak jika qty > stok tersedia.
+  D3. Penyesuaian / Stock Opname (ADJUSTMENT): input stok fisik hasil hitung,
+      sistem menghitung selisih. Hanya manager/admin.
+  D4. Riwayat transaksi: filter tanggal, tipe, produk; pagination; detail.
+  D5. Transaksi bersifat IMMUTABLE (ledger): tidak ada edit/hapus. Koreksi
+      dilakukan lewat transaksi penyesuaian. (Alasan desain untuk esai.)
+
+[E] LAPORAN (P1)
+  E1. Laporan stok saat ini (filter kategori) + export CSV + tampilan cetak.
+  E2. Laporan transaksi per periode + export CSV.
+  E3. Export CSV aman dari CSV/Formula injection (awali sel yang berawalan
+      = + - @ dengan tanda petik tunggal).
+
+[F] AUDIT & KEAMANAN TAMBAHAN (P1)
+  F1. Activity log: login, logout, create/update/delete master, transaksi
+      stok, perubahan role. Halaman log (admin).
+  F2. Security headers middleware.
+  F3. Halaman error kustom: 403, 404, 419 (sesi kedaluwarsa), 500.
+
+[G] OPSIONAL (P2)
+  G1. Upload foto produk (hati-hati: filesystem Railway ephemeral; lewati
+      kalau tidak ada waktu).
+  G2. Dark mode, export PDF, notifikasi email stok menipis. (Skip saja.)
+
+--- BUSINESS RULES (harus konsisten di kode, test, dan esai) ---
+  BR1  Stok tidak boleh negatif (validasi + pengecekan di service + CHECK
+       logika di transaksi DB).
+  BR2  Stok produk HANYA berubah lewat StockService (tidak ada edit stok
+       langsung di form produk).
+  BR3  Setiap perubahan stok atomik: DB::transaction + lockForUpdate pada
+       baris produk (mencegah race condition / oversell).
+  BR4  SKU unik (MySQL collation case-insensitive).
+  BR5  Kategori tidak bisa dihapus bila masih punya produk (FK restrict ->
+       tampilkan pesan ramah, bukan error 500).
+  BR6  Produk yang sudah punya transaksi tidak bisa dihapus (restrict).
+       Jika perlu, set `is_active=false` (produk nonaktif tidak muncul di
+       dropdown transaksi).
+  BR7  Hapus pemasok -> supplier_id di produk & transaksi jadi NULL (histori
+       tetap aman).
+  BR8  Registrasi selalu role `staff`. Hanya admin yang bisa ubah role.
+  BR9  Admin tidak bisa menghapus/menonaktifkan/menurunkan role dirinya
+       sendiri, dan minimal 1 admin aktif harus tetap ada.
+  BR10 Harga jual >= harga beli.
+  BR11 Stok menipis = stock <= min_stock.
+  BR12 Nomor referensi transaksi unik, format: IN-YYYYMMDD-0001 /
+       OUT-... / ADJ-... (urutan harian).
+
+
+================================================================================
+4. ROLE & HAK AKSES (RBAC MATRIX)
+================================================================================
+
+Peran: admin, manager, staff. (Guest = belum login.)
+
++------------------------------------+-------+---------+-------+--------+
+| Fitur / Aksi                       | Guest | Staff   | Mgr   | Admin  |
++------------------------------------+-------+---------+-------+--------+
+| Lihat halaman login/registrasi     |  Ya   |  -      |  -    |  -     |
+| Dashboard                          |  -    |  Ya(*)  |  Ya   |  Ya    |
+| Lihat produk/kategori/pemasok      |  -    |  Ya     |  Ya   |  Ya    |
+| Tambah/ubah/hapus produk           |  -    |  -      |  Ya   |  Ya    |
+| Tambah/ubah/hapus kategori         |  -    |  -      |  Ya   |  Ya    |
+| Tambah/ubah/hapus pemasok          |  -    |  -      |  Ya   |  Ya    |
+| Stok masuk (IN)                    |  -    |  Ya     |  Ya   |  Ya    |
+| Stok keluar (OUT)                  |  -    |  Ya     |  Ya   |  Ya    |
+| Penyesuaian stok (ADJ)             |  -    |  -      |  Ya   |  Ya    |
+| Lihat riwayat transaksi            |  -    |  Ya     |  Ya   |  Ya    |
+| Laporan + export CSV               |  -    |  -      |  Ya   |  Ya    |
+| Kelola user (CRUD, role)           |  -    |  -      |  -    |  Ya    |
+| Lihat activity log                 |  -    |  -      |  -    |  Ya    |
+| Ubah profil & password sendiri     |  -    |  Ya     |  Ya   |  Ya    |
++------------------------------------+-------+---------+-------+--------+
+(*) Staff tidak melihat kartu "Nilai Persediaan" (informasi finansial).
+
+IMPLEMENTASI (dua lapis, ini poin nilai "Role based access policy"):
+  Lapis 1 - Middleware `role:admin,manager` (EnsureUserHasRole) di group
+            route -> kasar, per-halaman. Gagal -> 403.
+  Lapis 2 - Policy (UserPolicy, ProductPolicy, dll.) di controller via
+            $this->authorize() -> halus, per-record/aturan (mis. admin tidak
+            boleh hapus dirinya sendiri).
+  Lapis 3 - Blade @can / @if(auth()->user()->hasRole(...)) hanya untuk
+            menyembunyikan tombol/menu. Ini kosmetik; server tetap menolak.
+  Catatan: Laravel 11+ tidak punya app/Http/Kernel.php. Alias middleware
+  didaftarkan di bootstrap/app.php. Policy ditemukan otomatis lewat
+  konvensi nama (App\Models\Product -> App\Policies\ProductPolicy).
+
+AKUN SEED (tulis di README):
+  admin    : admin@gudangku.test    / Admin@12345
+  manager  : manager@gudangku.test  / Manager@12345
+  staff    : staff@gudangku.test    / Staff@12345
+  (Semua memenuhi aturan password: min 8, huruf besar-kecil, angka.)
+
+
+================================================================================
+5. DESAIN DATABASE
+================================================================================
+
+Minimal soal: 4 tabel berelasi. Kita buat 6 tabel domain + tabel sistem
+(sessions, cache, dll. bawaan Laravel) = lebih dari cukup.
+
+--- 5.1 ERD (Mermaid) ---
+Render di https://mermaid.live lalu export PNG/SVG untuk PDF. Atau gambar
+ulang di dbdiagram.io / draw.io. Pastikan nama tabel & kolom sama dengan
+migrasi.
+
+erDiagram
+    USERS ||--o{ STOCK_TRANSACTIONS : "mencatat"
+    USERS ||--o{ ACTIVITY_LOGS : "melakukan"
+    CATEGORIES ||--o{ PRODUCTS : "mengelompokkan"
+    SUPPLIERS ||--o{ PRODUCTS : "memasok"
+    SUPPLIERS ||--o{ STOCK_TRANSACTIONS : "mengirim (IN)"
+    PRODUCTS ||--o{ STOCK_TRANSACTIONS : "memiliki pergerakan"
+
+    USERS {
+        bigint id PK
+        varchar name
+        varchar email UK
+        varchar password
+        enum role "admin|manager|staff"
+        boolean is_active
+        timestamp created_at
+        timestamp updated_at
+    }
+    CATEGORIES {
+        bigint id PK
+        varchar name UK
+        text description
+    }
+    SUPPLIERS {
+        bigint id PK
+        varchar name
+        varchar contact_person
+        varchar phone
+        varchar email
+        text address
+    }
+    PRODUCTS {
+        bigint id PK
+        bigint category_id FK
+        bigint supplier_id FK "nullable"
+        varchar sku UK
+        varchar name
+        text description
+        varchar unit
+        decimal purchase_price
+        decimal selling_price
+        int stock
+        int min_stock
+        varchar rack_location
+        boolean is_active
+    }
+    STOCK_TRANSACTIONS {
+        bigint id PK
+        varchar reference_no UK
+        bigint product_id FK
+        bigint user_id FK
+        bigint supplier_id FK "nullable"
+        enum type "in|out|adjustment"
+        int quantity
+        int stock_before
+        int stock_after
+        varchar recipient "nullable"
+        date transaction_date
+        text notes
+    }
+    ACTIVITY_LOGS {
+        bigint id PK
+        bigint user_id FK "nullable"
+        varchar action
+        varchar subject_type
+        bigint subject_id
+        varchar description
+        varchar ip_address
+        timestamp created_at
+    }
+
+Kardinalitas: 
+  categories 1 - N products          (satu kategori banyak produk)
+  suppliers  1 - N products          (satu pemasok banyak produk)
+  products   1 - N stock_transactions
+  users      1 - N stock_transactions
+  suppliers  1 - N stock_transactions (hanya tipe IN)
+  users      1 - N activity_logs
+
+--- 5.2 DETAIL TABEL ---
+
+users (modifikasi migration bawaan Laravel sebelum migrate pertama)
+  id, name(100), email(150, unique), email_verified_at(nullable), password,
+  role ENUM('admin','manager','staff') DEFAULT 'staff' [index],
+  is_active BOOLEAN DEFAULT 1, remember_token, timestamps.
+
+categories
+  id, name(100, unique), description(text, nullable), timestamps.
+
+suppliers
+  id, name(150), contact_person(100,null), phone(30,null), email(150,null),
+  address(text,null), timestamps.
+
+products
+  id, category_id (FK categories, RESTRICT ON DELETE),
+  supplier_id (FK suppliers, nullable, SET NULL ON DELETE),
+  sku(50, unique), name(150) [index], description(null), unit(20, default 'pcs'),
+  purchase_price DECIMAL(15,2) default 0, selling_price DECIMAL(15,2) default 0,
+  stock UNSIGNED INT default 0, min_stock UNSIGNED INT default 5,
+  rack_location(50,null), is_active BOOLEAN default 1, timestamps.
+
+stock_transactions
+  id, reference_no(30, unique),
+  product_id (FK products, RESTRICT), user_id (FK users, RESTRICT),
+  supplier_id (FK suppliers, nullable, SET NULL),
+  type ENUM('in','out','adjustment') [index],
+  quantity UNSIGNED INT (besar perubahan, selalu positif),
+  stock_before UNSIGNED INT, stock_after UNSIGNED INT,
+  recipient(150,null), transaction_date DATE [index],
+  notes(text,null), timestamps.
+  Index gabungan: (product_id, transaction_date).
+  Arah perubahan = stock_after - stock_before.
+
+activity_logs
+  id, user_id (FK users, nullable, SET NULL), action(50) [index],
+  subject_type(100,null), subject_id(null), description(255),
+  ip_address(45,null), created_at.
+
+Tabel sistem bawaan: sessions, password_reset_tokens, cache, cache_locks,
+jobs, job_batches, failed_jobs, migrations.
+
+--- 5.3 MIGRATION ---
+  Satu file per tabel, urutan: users(modif) -> categories -> suppliers ->
+  products -> stock_transactions -> activity_logs. Pakai foreignId()->
+  constrained()->restrictOnDelete()/nullOnDelete(). Semua harus bisa
+  `php artisan migrate:fresh --seed` tanpa error.
+
+--- 5.4 SEEDER (dummy data, soal mengizinkan) ---
+  UserSeeder       : 3 akun inti (lihat Bagian 4) + 3-5 staff dummy.
+  CategorySeeder   : 8 kategori (Elektronik, Alat Tulis Kantor, Makanan &
+                     Minuman Kemasan, Perlengkapan Rumah Tangga, Kebersihan,
+                     Perkakas, Kemasan & Packaging, Aksesoris Komputer).
+  SupplierSeeder   : 6 pemasok (nama perusahaan fiktif realistis).
+  ProductSeeder    : ~40 produk nyata-terlihat (nama, SKU pola KAT-0001,
+                     satuan pcs/box/pack/kg, harga masuk akal dalam Rupiah),
+                     sebagian sengaja stok menipis agar dashboard hidup.
+  TransactionSeeder: ~120 transaksi tersebar 30 hari terakhir, dibuat
+                     MELALUI StockService (bukan insert mentah) supaya
+                     stock_before/after konsisten. Beri guard
+                     `if (StockTransaction::exists()) return;` agar aman
+                     jika seeder dijalankan ulang.
+  Gunakan firstOrCreate/updateOrCreate di seeder master supaya idempotent.
+  Jangan pakai Faker bahasa yang aneh untuk data utama; tulis array manual
+  agar data rapi untuk screenshot dan demo.
+
+--- 5.5 FILE .SQL (deliverable) ---
+  Setelah migrate:fresh --seed berhasil di lokal:
+    mysqldump -u root -p --routines --single-transaction gudangku > database/gudangku.sql
+  Commit file ini ke repo. Di README jelaskan 2 cara setup DB:
+  (a) migrate + seed  (disarankan), (b) import gudangku.sql.
+
+
+================================================================================
+6. ARSITEKTUR APLIKASI
+================================================================================
+
+--- 6.1 Pola ---
+MVC klasik Laravel + 3 lapisan pendukung agar controller tetap tipis:
+
+  Model        : Eloquent (relasi, casts, fillable, scope, accessor).
+  View         : Blade (layout, partials, komponen sederhana).
+  Controller   : tipis; menerima Request, memanggil FormRequest/Service/Model,
+                 mengembalikan view/redirect.
+  FormRequest  : validasi + sanitasi + otorisasi input.
+  Service      : StockService (logika bisnis stok, transaksi DB), 
+                 ActivityLogger (audit).
+  Policy       : otorisasi per-aksi/record.
+  Middleware   : EnsureUserHasRole, EnsureUserIsActive, SecurityHeaders.
+  Exception    : InsufficientStockException (domain error -> flash error).
+
+--- 6.2 Request lifecycle (untuk diagram alur & esai) ---
+Flowchart (Mermaid):
+
+flowchart TD
+    A[Browser: HTTP Request] --> B[public/index.php]
+    B --> C[bootstrap/app.php: boot framework]
+    C --> D[Global middleware: TrustProxies, SecurityHeaders]
+    D --> E[Web group: StartSession, ShareErrors, VerifyCsrfToken]
+    E --> F{Route match di routes/web.php}
+    F -->|tidak ada| X404[404 view]
+    F --> G[Route middleware: auth, active, role, throttle]
+    G -->|gagal| X403[403 / redirect login / 429]
+    G --> H[Controller method]
+    H --> I[FormRequest: authorize + validate + sanitize]
+    I -->|invalid| J[Redirect back + errors + old input]
+    I --> K[Service / Model Eloquent / Query Builder]
+    K --> L[(MySQL via PDO prepared statements)]
+    L --> K
+    K --> M[Return data]
+    M --> N[Blade view render: output ter-escape otomatis]
+    N --> O[Response HTML ke browser]
+
+--- 6.3 Alur data contoh: Stok Keluar ---
+  Form (CSRF token) -> POST /stock/out -> middleware auth+role ->
+  StockOutController@store -> StoreStockOutRequest (validasi: product exists,
+  qty integer >=1, tanggal valid, strip_tags notes) -> StockService::stockOut()
+  -> DB::transaction { Product::lockForUpdate()->findOrFail; cek stok cukup
+  (kalau tidak: throw InsufficientStockException); update stok; create
+  StockTransaction (before/after); ActivityLogger::log } -> redirect
+  /transactions/{id} + flash sukses. Exception domain ditangkap -> back()
+  withInput withErrors. Exception tak terduga -> Log::error + halaman 500.
+
+--- 6.4 Diagram deployment ---
+flowchart LR
+    U[User Browser] -- HTTPS --> R[Railway Edge/Proxy]
+    R --> A[Laravel App container: Railpack + PHP web server]
+    A -- private network --> D[(Railway MySQL)]
+    G[GitHub repo] -- push triggers build --> A
+
+--- 6.5 Struktur direktori (target) ---
+gudangku/
+  app/
+    Exceptions/InsufficientStockException.php
+    Http/
+      Controllers/
+        Auth/AuthController.php          (register, login, logout)
+        DashboardController.php
+        CategoryController.php           (resource)
+        SupplierController.php           (resource)
+        ProductController.php            (resource)
+        StockInController.php            (create, store)
+        StockOutController.php           (create, store)
+        StockAdjustmentController.php    (create, store)
+        StockTransactionController.php   (index, show)
+        ReportController.php
+        UserController.php               (resource, admin)
+        ProfileController.php
+        ActivityLogController.php
+      Middleware/
+        EnsureUserHasRole.php
+        EnsureUserIsActive.php
+        SecurityHeaders.php
+      Requests/
+        Auth/RegisterRequest.php, LoginRequest.php
+        StoreCategoryRequest.php, UpdateCategoryRequest.php
+        StoreSupplierRequest.php, UpdateSupplierRequest.php
+        StoreProductRequest.php,  UpdateProductRequest.php
+        StoreStockInRequest.php, StoreStockOutRequest.php,
+        StoreStockAdjustmentRequest.php
+        StoreUserRequest.php, UpdateUserRequest.php
+        UpdateProfileRequest.php, UpdatePasswordRequest.php
+    Models/ User, Category, Supplier, Product, StockTransaction, ActivityLog
+    Policies/ UserPolicy, ProductPolicy, CategoryPolicy, SupplierPolicy,
+              StockTransactionPolicy
+    Services/ StockService.php, ActivityLogger.php
+    Providers/AppServiceProvider.php     (Password::defaults, RateLimiter,
+                                          Paginator::useBootstrapFive)
+  bootstrap/app.php                      (alias middleware, trustProxies, exceptions)
+  config/                                (timezone Asia/Jakarta, locale id)
+  database/
+    migrations/ ... seeders/ ... factories/ (opsional)
+    gudangku.sql                         (dump untuk deliverable)
+  lang/id/validation.php                 (pesan validasi Indonesia, ditulis manual)
+  resources/views/
+    layouts/app.blade.php, layouts/guest.blade.php
+    partials/ navbar, sidebar, flash, confirm-delete, pagination
+    auth/ login, register
+    dashboard.blade.php
+    categories/ suppliers/ products/ (index, create, edit, show, _form)
+    stock/ in, out, adjustment
+    transactions/ index, show
+    reports/ stock, transactions, print
+    users/ index, create, edit
+    profile/ edit
+    activity-logs/ index
+    errors/ 403, 404, 419, 500
+  routes/web.php
+  tests/Feature/ AuthTest, RoleAccessTest, ProductCrudTest,
+                 StockServiceTest, XssEscapingTest
+  .agents/rules/                         (rules untuk Antigravity)
+  AGENTS.md  (opsional, ringkasan rules)
+  README.md  .env.example  .gitignore  project.txt (opsional di repo)
+
+
+================================================================================
+7. ROUTING (routes/web.php)
+================================================================================
+
+Middleware group: [auth, active] = harus login & akun aktif.
+"manage" = role:admin,manager. "admin" = role:admin.
+
++--------+------------------------------+--------------------------------+---------------------+
+| Method | URI                          | Controller@method              | Middleware          |
++--------+------------------------------+--------------------------------+---------------------+
+| GET    | /                            | redirect (dashboard / login)   | -                   |
+| GET    | /register                    | AuthController@showRegister    | guest               |
+| POST   | /register                    | AuthController@register        | guest               |
+| GET    | /login                       | AuthController@showLogin       | guest               |
+| POST   | /login                       | AuthController@login           | guest, throttle:login|
+| POST   | /logout                      | AuthController@logout          | auth                |
+| GET    | /dashboard                   | DashboardController@index      | auth, active        |
+| GET    | /profile                     | ProfileController@edit         | auth, active        |
+| PUT    | /profile                     | ProfileController@update       | auth, active        |
+| PUT    | /profile/password            | ProfileController@updatePassword| auth, active       |
+| GET    | /products, /products/{id}    | ProductController@index, show  | auth, active        |
+| GET/POST | /products/create, /products| ProductController@create,store| auth, active, manage|
+| GET/PUT  | /products/{id}/edit, /{id} | ProductController@edit,update  | auth, active, manage|
+| DELETE | /products/{id}               | ProductController@destroy      | auth, active, manage|
+| (sama untuk categories & suppliers: index/show semua role login;           |
+|  create/store/edit/update/destroy hanya manage)                            |
+| GET/POST | /stock/in                  | StockInController@create,store | auth, active        |
+| GET/POST | /stock/out                 | StockOutController@create,store| auth, active       |
+| GET/POST | /stock/adjustment          | StockAdjustmentController@...  | auth, active, manage|
+| GET    | /transactions                | StockTransactionController@index| auth, active       |
+| GET    | /transactions/{id}           | StockTransactionController@show| auth, active        |
+| GET    | /reports/stock               | ReportController@stock         | auth, active, manage|
+| GET    | /reports/stock/export        | ReportController@exportStock   | auth, active, manage|
+| GET    | /reports/transactions        | ReportController@transactions  | auth, active, manage|
+| GET    | /reports/transactions/export | ReportController@exportTransactions| manage          |
+| Resource | /users (index..destroy)    | UserController                 | auth, active, admin |
+| GET    | /activity-logs               | ActivityLogController@index    | auth, active, admin |
+| GET    | /up                          | healthcheck bawaan Laravel     | -                   |
++--------+------------------------------+--------------------------------+---------------------+
+
+Catatan: urutan route `/products/create` harus SEBELUM `/products/{product}`
+(kalau pakai Route::resource, Laravel sudah mengatur ini). Pakai route model
+binding. Semua form berubah-state memakai POST/PUT/DELETE + @csrf + @method.
+Tidak ada aksi mengubah data lewat GET.
+
+
+================================================================================
+8. KEAMANAN (CPMK4 - bobot 15% + esai)
+================================================================================
+
+Checklist implementasi. Tiap poin = bukti di kode + screenshot + bahan esai.
+
+[8.1] CSRF
+  - Semua <form> method POST/PUT/PATCH/DELETE memuat @csrf (+ @method).
+  - Middleware VerifyCsrfToken aktif (bawaan group `web`). Jangan pernah
+    menambahkan pengecualian di `validateCsrfTokens(except: ...)`.
+  - Logout lewat POST. Halaman 419 kustom untuk sesi/token kedaluwarsa.
+  - Demo: hapus token via DevTools lalu submit -> muncul 419.
+  - Catatan: saat menjalankan test, CSRF dimatikan otomatis oleh framework;
+    verifikasi CSRF dilakukan manual + dijelaskan di esai.
+
+[8.2] XSS
+  - Output Blade pakai {{ $var }} (auto htmlspecialchars). DILARANG {!! !!}
+    untuk data pengguna.
+  - Sanitasi input: di FormRequest::prepareForValidation() jalankan
+    trim() + strip_tags() untuk field teks (name, description, notes,
+    recipient, address, dll.).
+  - Dalam atribut HTML/JS: untuk data ke JavaScript (Chart.js) gunakan
+    @json($data) atau Js::from($data), bukan echo mentah.
+  - Header X-Content-Type-Options: nosniff; (opsional) Content-Security-Policy
+    report-only. Karena memakai CDN, jika CSP diaktifkan whitelist host CDN.
+  - Test: simpan produk bernama `<script>alert(1)</script>` -> halaman
+    menampilkan teks literal, tidak mengeksekusi.
+
+[8.3] SQL INJECTION
+  - Semua query lewat Eloquent / Query Builder (PDO prepared statements,
+    parameter binding).
+  - Bila butuh raw (SUM/GROUP BY), pakai selectRaw('... ?', [$binding]) atau
+    ekspresi statis tanpa input pengguna. DILARANG menyambung string input
+    ke SQL. Kolom sorting dari user harus lewat whitelist.
+  - LIKE search: where('name', 'like', "%{$q}%") tetap aman (binding), tapi
+    escape karakter % dan _ jika mau presisi.
+  - Demo: input `' OR 1=1 --` di kolom search/login -> tidak berpengaruh.
+
+[8.4] AUTENTIKASI & PASSWORD
+  - Hash::make / cast 'hashed' (bcrypt, BCRYPT_ROUNDS=12). Tidak ada password
+    plaintext, tidak ada password di log.
+  - Password::defaults(): min 8, mixedCase, numbers (di AppServiceProvider).
+  - Login: Auth::attempt(['email'=>..,'password'=>..,'is_active'=>1]).
+    Pesan gagal generik: "Email atau password salah." (anti user enumeration).
+  - Throttle: RateLimiter::for('login') 5/menit by email+IP.
+  - Mass assignment: $fillable eksplisit; `role` & `is_active` TIDAK ada di
+    $fillable untuk jalur registrasi publik (set manual di controller admin).
+
+[8.5] SESSION
+  - SESSION_DRIVER=database, lifetime 120 menit, http_only=true,
+    same_site=lax, secure cookie=true di production (HTTPS).
+  - Login sukses: $request->session()->regenerate()  (cegah session fixation).
+  - Logout: Auth::logout(); session()->invalidate(); session()->regenerateToken().
+  - Middleware EnsureUserIsActive: jika user dinonaktifkan saat sesi aktif ->
+    logout paksa.
+  - Ubah password -> regenerate session (opsional Auth::logoutOtherDevices).
+
+[8.6] OTORISASI (RBAC)
+  - Middleware role + Policy + @can (lihat Bagian 4). Selalu validasi di
+    server. Uji manual: login staff lalu buka URL admin langsung -> 403.
+  - IDOR: pakai route model binding + policy; tidak pernah percaya id
+    dari form hidden tanpa validasi `exists`.
+
+[8.7] VALIDASI INPUT SERVER-SIDE
+  - Semua input lewat FormRequest (aturan di Bagian 9). Tidak ada
+    $request->all() langsung ke create(); pakai $request->validated().
+
+[8.8] HARDENING LAIN
+  - APP_DEBUG=false & APP_ENV=production di live (jangan bocorkan stack trace).
+  - .env tidak di-commit. Hanya .env.example.
+  - SecurityHeaders middleware: X-Frame-Options: SAMEORIGIN,
+    X-Content-Type-Options: nosniff, Referrer-Policy:
+    strict-origin-when-cross-origin, Permissions-Policy (matikan kamera,
+    mikrofon, geolokasi), Strict-Transport-Security (hanya production).
+  - trustProxies(at: '*') di Railway agar URL https & cookie secure benar.
+  - Export CSV: netralkan formula injection.
+  - Log error ke stderr di production; jangan tampilkan detail ke user.
+
+TABEL RINGKAS UNTUK PDF/ESAI:
+  Ancaman          | Mitigasi di GudangKu                      | Lokasi kode
+  CSRF             | @csrf + VerifyCsrfToken                   | semua form
+  XSS              | {{ }} escape + strip_tags di FormRequest  | views, Requests
+  SQL Injection    | Eloquent/Query Builder binding            | controllers/services
+  Brute force      | throttle login 5/menit                    | AppServiceProvider
+  Session fixation | regenerate saat login                     | AuthController
+  Priv. escalation | role dari server, middleware + policy    | routes, Policies
+  Mass assignment  | $fillable + validated()                   | Models, Requests
+  Info leakage     | APP_DEBUG=false, error pages kustom       | .env, views/errors
+
+
+================================================================================
+9. VALIDASI & ERROR HANDLING
+================================================================================
+
+--- 9.1 Aturan validasi utama ---
+Register : name required|string|max:100 ; email required|email:rfc|max:150|
+           unique:users ; password required|confirmed|Password::defaults()
+Login    : email required|email ; password required|string
+Category : name required|string|max:100|unique(ignore saat update) ;
+           description nullable|string|max:500
+Supplier : name required|max:150 ; email nullable|email|max:150 ;
+           phone nullable|regex:/^[0-9+\-\s()]{6,30}$/ ; address nullable|max:500
+Product  : sku required|alpha_dash|max:50|unique(ignore saat update) ;
+           name required|max:150 ; category_id required|exists:categories,id ;
+           supplier_id nullable|exists:suppliers,id ;
+           unit required|max:20 ;
+           purchase_price required|numeric|min:0|max:9999999999 ;
+           selling_price required|numeric|gte:purchase_price ;
+           min_stock required|integer|min:0 ;
+           initial_stock (hanya create) nullable|integer|min:0|max:1000000 ;
+           is_active boolean
+Stok IN  : product_id required|exists (produk aktif) ; quantity required|
+           integer|min:1|max:1000000 ; supplier_id nullable|exists ;
+           transaction_date required|date|before_or_equal:today ;
+           notes nullable|max:500
+Stok OUT : product_id ; quantity integer|min:1 ; recipient required|max:150 ;
+           transaction_date ; notes. Cek stok cukup di service (sumber
+           kebenaran) + pesan error ramah.
+Adjust   : product_id ; actual_stock required|integer|min:0 ; notes required|
+           min:5 (alasan wajib) ; transaction_date.
+User     : name, email unique, role Rule::in(['admin','manager','staff']),
+           is_active boolean, password (create wajib, update opsional).
+
+--- 9.2 Pesan & UX ---
+  - Pesan error Bahasa Indonesia: buat lang/id/validation.php manual dan
+    set APP_LOCALE=id. Atribut ramah ("harga beli", "stok minimum").
+  - Tampilkan error per-field (class is-invalid + invalid-feedback), pertahankan
+    input lama dengan old().
+
+--- 9.3 Error handling ---
+  - Domain error: InsufficientStockException -> dipetakan ke redirect back
+    withErrors(['quantity' => 'Stok tidak cukup. Tersedia: X']).
+  - Delete terbatasi FK: tangkap QueryException (kode 23000) atau cek
+    relasi lebih dulu (`$category->products()->exists()`) -> flash error ramah.
+  - Transaksi DB: DB::transaction() otomatis rollback jika exception.
+  - Log::error() untuk exception tak terduga (konteks: user_id, aksi).
+  - Halaman error kustom 403/404/419/500 di resources/views/errors.
+  - Flash message konsisten: success / error / warning / info (partials/flash).
+
+
+================================================================================
+10. DAFTAR HALAMAN UI
+================================================================================
+Layout: sidebar kiri (menu sesuai role) + topbar (nama user, role badge,
+logout) + area konten + flash alert. Responsive (Bootstrap grid, sidebar
+collapse di mobile). Nuansa profesional: warna netral + 1 warna aksen,
+tabel bersih, badge status stok (hijau aman / kuning menipis / merah habis),
+empty state ("Belum ada data"), konfirmasi sebelum hapus (modal Bootstrap).
+
+Halaman: Login, Register, Dashboard, Produk (list/detail/form), Kategori,
+Pemasok, Stok Masuk, Stok Keluar, Penyesuaian Stok, Riwayat Transaksi
+(+detail), Laporan Stok, Laporan Transaksi, Kelola User, Activity Log,
+Profil, Error 403/404/419/500.
+
+Pagination Bootstrap 5, search bar + filter di tiap index, kolom aksi
+(lihat/ubah/hapus) mengikuti hak akses.
+
+
+================================================================================
+11. RENCANA TESTING
+================================================================================
+Soal menyebut kemampuan "menguji", jadi sertakan tes nyata + QA manual.
+
+Setup: buat DB MySQL `gudangku_test`. Di phpunit.xml aktifkan:
+  <env name="DB_CONNECTION" value="mysql"/>
+  <env name="DB_DATABASE" value="gudangku_test"/>
+(hapus/komentari baris sqlite :memory: bawaan; soal mewajibkan MySQL.)
+Pakai trait RefreshDatabase. Jalankan: php artisan test
+
+Feature tests minimal (P0/P1):
+  AuthTest        : register -> role selalu staff walau request menyisipkan
+                    role=admin; login sukses/gagal; akun nonaktif ditolak;
+                    logout menghapus sesi; throttle setelah 5 gagal.
+  RoleAccessTest  : guest -> redirect login; staff 403 di /users, /reports,
+                    /stock/adjustment, POST /products; manager 403 di /users;
+                    admin 200 di semua.
+  ProductCrudTest : create/read/update/delete valid; validasi gagal (SKU
+                    duplikat, harga jual < harga beli); hapus produk
+                    bertransaksi ditolak; hapus kategori berisi produk ditolak.
+  StockServiceTest: IN menambah stok & mencatat before/after; OUT melebihi
+                    stok melempar InsufficientStockException dan stok tidak
+                    berubah (rollback); ADJUSTMENT menghitung selisih benar.
+  XssEscapingTest : nama produk berisi <script> tampil ter-escape
+                    (assertSee('&lt;script&gt;', false)).
+
+QA manual (isi tabel hasil, jadikan screenshot bukti):
+  - Alur penuh tiap role. - Uji 419 (hapus token). - Uji SQLi di search/login.
+  - Uji akses URL langsung lintas role. - Uji responsif mobile.
+  - Uji di production (live URL): register, login, CRUD, stok OUT.
+
+
+================================================================================
+12. GIT WORKFLOW & RENCANA COMMIT
+================================================================================
+Tujuan: commit history yang jujur, bertahap, dan bisa dijelaskan.
+
+Aturan:
+  - git init di awal. Remote GitHub dibuat di Fase 0.
+  - Branch `main` stabil. Boleh pakai branch fitur (feature/auth, dst.) lalu
+    merge, tapi jangan berlebihan. Minimal commit per fase, ideal per sub-fitur.
+  - Pesan commit gaya conventional: feat:, fix:, docs:, test:, chore:, refactor:.
+  - JANGAN commit: .env, vendor/, node_modules/, storage/logs/*.
+  - COMMIT: database/gudangku.sql, .env.example, README.md.
+  - Jangan "squash" semua jadi satu. Jangan commit dengan tanggal/author palsu.
+
+Rencana commit (contoh urutan):
+   1. chore: init laravel project, configure mysql + timezone + locale
+   2. docs: add project plan and ERD draft
+   3. feat(db): create users, categories, suppliers migrations
+   4. feat(db): create products and stock_transactions migrations
+   5. feat(db): add activity_logs migration and model relationships
+   6. feat(db): add seeders for users, categories, suppliers, products
+   7. feat(auth): manual register, login, logout with session
+   8. feat(security): login throttle, active-user and security headers middleware
+   9. feat(rbac): role middleware, policies, 403 page
+  10. feat(ui): base layout, sidebar, flash messages
+  11. feat(category): crud with validation
+  12. feat(supplier): crud with validation
+  13. feat(product): crud, search, filter, pagination
+  14. feat(stock): StockService with atomic in/out/adjustment
+  15. feat(stock): stock in, out, adjustment forms and history
+  16. feat(dashboard): summary cards, low stock table, chart
+  17. feat(user): admin user management
+  18. feat(report): stock & transaction report with csv export
+  19. feat(audit): activity log
+  20. test: feature tests for auth, rbac, product, stock, xss
+  21. fix: ... (hasil review/QA)
+  22. docs: readme, env example, sql dump
+  23. chore(deploy): railway config, trust proxies, stderr logging
+  24. docs: deployment notes
+
+
+================================================================================
+13. RULES UNTUK AI ANTIGRAVITY
+================================================================================
+Cara pasang: buat folder `.agents/rules/` di root project (Antigravity kini
+default ke `.agents/rules`, `.agent/rules` lama masih didukung; atau lewat
+panel Customizations > Rules > + Workspace). Setiap file rules maksimal
+12.000 karakter, jadi dipecah jadi 4 file kecil. Set aktivasi "Always On".
+Antigravity juga membaca AGENTS.md di root (versi IDE baru); boleh taruh
+ringkasan yang sama di sana.
+
+Mode kerja agent yang disarankan: agent-assisted / review-driven. Terminal
+policy: minta persetujuan untuk perintah berisiko. Aktifkan "Planning":
+agent harus menulis rencana dulu, kamu review, baru eksekusi.
+
+---------- FILE 1: .agents/rules/00-project-overview.md ----------
+# GudangKu - Project Overview (ALWAYS FOLLOW)
+
+Ini proyek UAS kuliah (Web Application Development, individual). Tujuan:
+aplikasi Sistem Manajemen Inventaris Gudang, full-stack server-side,
+Laravel + MySQL, MVC, autentikasi + RBAC aman, siap deploy ke Railway.
+Pemilik proyek HARUS memahami dan bisa menjelaskan setiap baris kode.
+
+## Stack (WAJIB, jangan diganti)
+- Laravel versi yang sudah terpasang di composer.json (jangan upgrade/downgrade).
+- PHP sesuai composer.json. Database: MySQL SAJA (bukan SQLite/PostgreSQL).
+- View: Blade. UI: Bootstrap 5 + Bootstrap Icons + Chart.js lewat CDN.
+- Session driver: database. Test DB: MySQL `gudangku_test`.
+
+## DILARANG KERAS
+- Memasang package composer/npm baru TANPA izin eksplisit pemilik.
+- Memakai starter kit / boilerplate / generator: Breeze, Jetstream, Fortify
+  starter, Filament, Backpack, Voyager, Livewire starter, `make:auth`
+  dari pihak ketiga, template admin siap pakai. Auth ditulis manual.
+- Mengubah database ke selain MySQL.
+- Menghapus/menimpa file di luar scope tugas fase saat ini.
+- Menjalankan `migrate:fresh`, `db:wipe`, `rm -rf`, `git reset --hard`,
+  `git push --force` tanpa meminta konfirmasi lebih dulu.
+- Commit atau menampilkan isi .env / secret.
+
+## Sintaks Laravel
+- Pakai sintaks sesuai versi terpasang. Laravel 11+ TIDAK punya
+  app/Http/Kernel.php: middleware/alias/exception diatur di bootstrap/app.php.
+  Cek `composer.json` dan dokumentasi versi tsb sebelum menulis kode.
+- Jangan mengarang method/facade. Jika ragu, baca vendor/ atau tanyakan.
+
+## Cara kerja
+- Kerjakan HANYA fase yang diminta. Tulis rencana singkat dulu, tunggu OK.
+- Setelah selesai: ringkas file yang dibuat/diubah + cara mengujinya.
+- Kode harus mudah dijelaskan: sederhana, bernama jelas, ada komentar singkat
+  (Bahasa Indonesia) pada logika penting (transaksi DB, keamanan, otorisasi).
+
+---------- FILE 2: .agents/rules/01-coding-standards.md ----------
+# Coding Standards GudangKu
+
+## Arsitektur
+- MVC + FormRequest + Service + Policy. Controller TIPIS (maks ~25 baris/method).
+- Logika stok HANYA di App\Services\StockService. Controller tidak mengubah
+  kolom products.stock secara langsung.
+- Validasi di FormRequest (bukan di controller). Pakai $request->validated().
+- Otorisasi: middleware `role` untuk group route + Policy via authorize().
+- Route model binding. Resource controller bila cocok. Nama route konsisten
+  (products.index, stock.out.store, dst.).
+
+## Database
+- Migration satu tabel per file, FK eksplisit (constrained + restrictOnDelete /
+  nullOnDelete sesuai rencana). Index pada kolom yang difilter.
+- Eloquent untuk CRUD & relasi (hasMany/belongsTo, eager loading with()
+  untuk mencegah N+1). Query Builder boleh untuk agregasi laporan/dashboard.
+- Setiap perubahan stok: DB::transaction + lockForUpdate. Stok tidak boleh
+  negatif. Transaksi stok immutable (tanpa update/delete).
+- Seeder idempotent (firstOrCreate/updateOrCreate atau guard exists()).
+
+## View
+- Blade layout + partials. Semua output pakai {{ }}. JANGAN {!! !!} untuk
+  data user. Data ke JS pakai @json / Js::from.
+- Setiap form: @csrf (+ @method). Error per field + old().
+- Bahasa UI: Indonesia. Format Rupiah & tanggal Indonesia lewat helper/accessor.
+
+## Gaya
+- PSR-12, type hint & return type, nama variabel Inggris untuk kode, teks UI
+  Indonesia. Tidak ada kode mati / debug (dd, dump, console.log) di commit.
+- Tidak ada query di Blade. Tidak ada logika bisnis di Blade.
+
+---------- FILE 3: .agents/rules/02-security.md ----------
+# Security Rules GudangKu (NON-NEGOTIABLE)
+
+1. CSRF: semua form non-GET punya @csrf. Jangan menambah pengecualian CSRF.
+2. XSS: escape default Blade; strip_tags + trim di prepareForValidation()
+   untuk field teks bebas. Tidak ada {!! !!} untuk input user.
+3. SQL Injection: hanya Eloquent/Query Builder dengan binding. Raw SQL hanya
+   dengan binding atau ekspresi statis; sorting dinamis lewat whitelist.
+4. Auth manual: Auth::attempt dengan kondisi is_active=1; pesan gagal generik;
+   session()->regenerate() saat login; invalidate() + regenerateToken() saat
+   logout (logout via POST).
+5. Password: Hash (cast 'hashed'), Password::defaults() min 8 + mixedCase +
+   numbers. Jangan pernah log/echo password.
+6. Mass assignment: $fillable eksplisit. `role` & `is_active` TIDAK boleh
+   masuk dari registrasi publik. Registrasi publik = role staff.
+7. RBAC: terapkan di server (middleware + Policy). Menyembunyikan tombol di
+   Blade BUKAN keamanan. Admin tidak boleh hapus/nonaktifkan/ubah role diri
+   sendiri; minimal 1 admin aktif.
+8. Rate limit login: 5 percobaan/menit per email+IP.
+9. Header keamanan via middleware SecurityHeaders.
+10. Production: APP_DEBUG=false, APP_ENV=production, cookie secure, log ke stderr.
+11. Export CSV: netralkan formula injection (= + - @ di awal sel).
+12. Jangan commit .env / kredensial. Hanya .env.example.
+
+---------- FILE 4: .agents/rules/03-workflow-and-git.md ----------
+# Workflow & Git
+
+- Satu fase per sesi. Sebelum coding: tampilkan rencana file + perubahan.
+- Setelah coding: jalankan `php artisan test` (jika sudah ada tes) dan
+  `php artisan route:list` bila menyentuh route; laporkan hasilnya jujur.
+  Jika ada error, perbaiki akar masalah, jangan menyembunyikan/skip test.
+- Jangan membuat commit sendiri kecuali diminta. Sarankan pesan commit
+  (conventional commits) di akhir tiap fase.
+- Jelaskan keputusan desain penting dalam 3-5 kalimat agar pemilik bisa
+  mengulanginya di video esai.
+- Bila instruksi bertentangan dengan rules ini, STOP dan tanyakan.
+- Jangan mengarang fakta (versi, nama package, perintah). Verifikasi dulu.
+------------------------------------------------------------------------
+
+
+================================================================================
+14. PROMPT PACK PER FASE (COPY-PASTE KE ANTIGRAVITY)
+================================================================================
+Tips: mulai tiap fase dengan chat baru. Tempel prompt, minta rencana dulu,
+review, baru izinkan eksekusi. Setelah selesai: jalankan prompt EXPLAIN, uji
+manual, commit.
+
+---------- PROMPT EXPLAIN (pakai setelah SETIAP fase) ----------
+"Jelaskan semua kode yang barusan kamu buat/ubah di fase ini seolah aku harus
+mempresentasikannya ke dosen. Per file: tujuan, alur eksekusi baris demi
+baris untuk bagian penting, kenapa pendekatan ini dipilih, dan 3 pertanyaan
+yang mungkin ditanyakan dosen beserta jawabannya. Pakai Bahasa Indonesia
+sederhana. Tandai bagian yang sebaiknya aku pahami betul."
+
+---------- PROMPT REVIEW (pakai di akhir fase penting) ----------
+"Lakukan code review kritis terhadap perubahan fase ini terhadap rules di
+.agents/rules. Cari: celah keamanan (CSRF/XSS/SQLi/IDOR/mass assignment),
+N+1 query, logika stok yang tidak atomik, validasi yang kurang, kode yang
+terlalu rumit untuk dijelaskan. Laporkan temuan dengan severity, lalu
+usulkan perbaikan minimal. Jangan ubah apa pun sebelum aku setuju."
+
+--- FASE 0: SETUP PROJECT ---
+"Baca .agents/rules. Konteks: aku mengerjakan UAS Web Application Development
+(project.txt terlampir sebagai spesifikasi). Tugas FASE 0:
+1) Buat project Laravel baru bernama gudangku TANPA starter kit
+   (composer create-project laravel/laravel). Jangan install package lain.
+2) Konfigurasi .env & .env.example untuk MySQL (DB gudangku), SESSION_DRIVER=
+   database, QUEUE_CONNECTION=sync, CACHE_STORE=database, APP_LOCALE=id,
+   timezone Asia/Jakarta (config/app.php, bisa dari env APP_TIMEZONE).
+3) Buat .gitignore yang benar (.env, vendor, node_modules, storage logs).
+4) Buat folder .agents/rules dengan 4 file rules (isi aku tempel di bawah).
+5) Siapkan phpunit.xml agar memakai MySQL database gudangku_test (bukan
+   sqlite).
+6) Jalankan php artisan migrate untuk memastikan koneksi MySQL & tabel
+   sessions ada. Jelaskan apa yang terjadi.
+Beri rencana dulu, jangan eksekusi sebelum aku setuju. [tempel 4 file rules]"
+
+--- FASE 1: DATABASE (MIGRATION, MODEL, SEEDER) ---
+"FASE 1: Implementasikan skema database persis sesuai Bagian 5 project.txt.
+- Modifikasi migration users bawaan (tambah role enum & is_active).
+- Buat migration + model: Category, Supplier, Product, StockTransaction,
+  ActivityLog dengan FK, tipe data, index, dan aksi onDelete sesuai spesifikasi.
+- Di model: $fillable eksplisit (User: role & is_active TIDAK di $fillable),
+  casts (decimal, boolean, date), relasi lengkap (hasMany/belongsTo), scope
+  (Product::lowStock(), active()), accessor status stok, helper
+  User::hasRole(...$roles), isAdmin().
+- Seeder: UserSeeder, CategorySeeder, SupplierSeeder, ProductSeeder (~40
+  produk realistis, sebagian stok menipis), idempotent. TransactionSeeder
+  DITUNDA sampai StockService ada (Fase 5).
+- Pastikan php artisan migrate:fresh --seed sukses.
+Beri rencana dulu."
+
+--- FASE 2: AUTH MANUAL + SESSION ---
+"FASE 2: Implementasikan autentikasi MANUAL (tanpa starter kit):
+- AuthController (showRegister, register, showLogin, login, logout),
+  RegisterRequest & LoginRequest (strip_tags/trim di prepareForValidation).
+- Registrasi: role selalu 'staff' (diset di controller, bukan dari input),
+  Password::defaults() di AppServiceProvider (min 8, mixedCase, numbers).
+- Login: Auth::attempt dengan is_active=1, pesan gagal generik, regenerate
+  session, RateLimiter 'login' 5/menit by email+IP, redirect ke dashboard.
+- Logout via POST: logout, invalidate session, regenerateToken.
+- Middleware EnsureUserIsActive (logout paksa bila dinonaktifkan).
+- Middleware EnsureUserHasRole (alias 'role') didaftarkan di bootstrap/app.php,
+  juga trustProxies(at: '*').
+- View auth/login & auth/register memakai layouts/guest (Bootstrap CDN).
+- ActivityLogger service sederhana + catat login/logout.
+Sertakan 403 view. Beri rencana dulu, lalu jelaskan alur session."
+
+--- FASE 3: LAYOUT & UI DASAR ---
+"FASE 3: Buat layout aplikasi Blade: layouts/app (sidebar + topbar + flash),
+layouts/guest, partials (sidebar menurut role, flash, confirm-delete modal),
+Paginator::useBootstrapFive(). Halaman dashboard placeholder. Halaman error
+403/404/419/500 kustom. Desain bersih, responsif, profesional (netral + satu
+aksen warna), semua teks Indonesia. Tanpa @vite; pakai CDN Bootstrap 5.3,
+Bootstrap Icons. Menu sidebar hanya menampilkan item sesuai role (kosmetik)."
+
+--- FASE 4: CRUD MASTER DATA ---
+"FASE 4: CRUD penuh untuk Category, Supplier, Product (resource controller,
+FormRequest Store/Update, Policy, route dengan middleware sesuai matriks
+Bagian 4). Index: search, pagination (withQueryString), eager loading.
+Product: filter kategori & stok menipis, badge status stok, field
+initial_stock hanya saat create (nanti dihubungkan ke StockService di
+Fase 5), stok TIDAK bisa diedit di form edit. Aturan hapus: BR5, BR6, BR7
+dengan pesan error ramah. Validasi sesuai Bagian 9. Log aktivitas CUD.
+Kerjakan satu entitas per langkah dan tunggu aku verifikasi."
+
+--- FASE 5: STOCK SERVICE & TRANSAKSI ---
+"FASE 5: Implementasi logika stok:
+- App\\Services\\StockService: stockIn, stockOut, adjust, generateReference.
+  Semua dalam DB::transaction + Product::lockForUpdate(). stockOut melempar
+  App\\Exceptions\\InsufficientStockException bila stok kurang. Isi
+  stock_before/after. Catat ActivityLog.
+- Controller StockIn/StockOut/StockAdjustment (create+store), FormRequest,
+  view form; StockTransactionController index (filter tanggal/tipe/produk,
+  pagination) & show. Transaksi immutable (tanpa edit/hapus).
+- Hubungkan initial_stock produk baru -> transaksi 'in' notes 'Stok awal'.
+- Lengkapi TransactionSeeder via StockService (~120 transaksi 30 hari,
+  guard idempotent).
+- Policy: adjustment hanya manager/admin.
+Beri rencana, lalu jelaskan kenapa lockForUpdate dan transaksi DB penting."
+
+--- FASE 6: DASHBOARD ---
+"FASE 6: DashboardController + view: kartu (total produk, total unit,
+nilai persediaan [disembunyikan untuk staff], jumlah stok menipis), tabel
+stok menipis, transaksi terbaru, grafik Chart.js (CDN) stok masuk vs keluar
+14 hari (data dari Query Builder dengan groupBy tanggal, kirim via @json).
+Gunakan Query Builder untuk agregasi dan Eloquent untuk daftar; jelaskan
+kenapa dua-duanya dipakai. Hindari N+1."
+
+--- FASE 7: USER MGMT, PROFIL, LAPORAN, ACTIVITY LOG ---
+"FASE 7: (a) UserController CRUD (admin) dengan UserPolicy: tidak bisa
+hapus/nonaktifkan/ubah role diri sendiri, minimal 1 admin aktif, reset
+password. (b) ProfileController: ubah nama & password (butuh password lama,
+regenerate session). (c) ReportController: laporan stok & transaksi dengan
+filter + export CSV via response()->streamDownload + fputcsv, netralkan
+formula injection, tampilan cetak. (d) ActivityLogController index (admin)
+dengan filter & pagination."
+
+--- FASE 8: HARDENING KEAMANAN ---
+"FASE 8: Audit & perkuat keamanan sesuai Bagian 8 project.txt.
+- Tambah middleware SecurityHeaders (X-Frame-Options, nosniff, Referrer-Policy,
+  Permissions-Policy, HSTS hanya production) ke group web.
+- Telusuri SELURUH proyek: cari {!! !!}, DB::raw/whereRaw/selectRaw dengan
+  input, $request->all() ke create/update, form tanpa @csrf, route mengubah
+  data via GET, kolom sorting tanpa whitelist, $fillable yang terlalu longgar.
+- Laporkan temuan + perbaiki. Buat tabel 'Ancaman -> Mitigasi -> File'."
+
+--- FASE 9: TESTING ---
+"FASE 9: Tulis feature test sesuai Bagian 11 (AuthTest, RoleAccessTest,
+ProductCrudTest, StockServiceTest, XssEscapingTest) memakai MySQL
+gudangku_test + RefreshDatabase. Jalankan php artisan test dan laporkan
+hasil jujur. Perbaiki bug aplikasi yang ditemukan tes (bukan mengubah tes
+agar lolos)."
+
+--- FASE 10: DOKUMENTASI & DUMP ---
+"FASE 10: Buat README.md lengkap (template Bagian 16), .env.example final,
+dan dump database/gudangku.sql dari DB hasil migrate+seed (beri perintah
+mysqldump; aku yang jalankan). Pastikan instruksi instalasi benar dengan
+membaca ulang struktur project. Tambahkan docs/ERD.md (mermaid) dan
+docs/ARCHITECTURE.md (flowchart request, struktur folder, tabel routing)."
+
+--- FASE 11: DEPLOYMENT ---
+"FASE 11: Siapkan aplikasi untuk Railway (lihat Bagian 15 project.txt):
+log ke stderr di production, trustProxies, healthcheck /up, pastikan tidak
+bergantung pada filesystem persisten, config/session/cookie secure via env,
+dan buat panduan perintah build/start/pre-deploy (migrate --force, seed
+sekali). Jangan memasang package. Verifikasi php artisan route:cache,
+config:cache, view:cache berjalan tanpa error. Beri checklist env vars."
+
+
+================================================================================
+15. DEPLOYMENT KE RAILWAY (STEP BY STEP)
+================================================================================
+Catatan: detail UI/harga/trial Railway dapat berubah. Cek railway.com/pricing
+dan dokumentasi terbaru sebelum mulai, dan pastikan layanan tetap aktif sampai
+masa penilaian selesai (dosen perlu mengakses URL-nya). Jangan pakai template
+"Laravel starter" dari marketplace Railway karena melanggar aturan
+boilerplate; deploy dari REPO MILIKMU sendiri.
+
+LANGKAH:
+ 1. Push repo ke GitHub (main). Pastikan `composer install --no-dev` dan
+    `npm run build` (bila package.json ada) berhasil. Karena layout tidak
+    memakai @vite, build frontend bukan keharusan.
+ 2. Railway -> New Project -> Deploy from GitHub repo -> pilih repo gudangku.
+    Railway (Railpack) mendeteksi Laravel dari file artisan dan menyiapkan
+    PHP + web server.
+ 3. Tambahkan MySQL: di project klik + New -> Database -> MySQL.
+ 4. Di service aplikasi -> Variables, isi (cek nama variabel persisnya di tab
+    Variables service MySQL; contoh memakai reference variable Railway):
+
+      APP_NAME=GudangKu
+      APP_ENV=production
+      APP_DEBUG=false
+      APP_KEY=base64:...   (hasil: php artisan key:generate --show)
+      APP_URL=https://<domain-railway-kamu>
+      APP_LOCALE=id
+      APP_TIMEZONE=Asia/Jakarta
+      LOG_CHANNEL=stderr
+      LOG_LEVEL=info
+      DB_CONNECTION=mysql
+      DB_HOST=${{MySQL.MYSQLHOST}}
+      DB_PORT=${{MySQL.MYSQLPORT}}
+      DB_DATABASE=${{MySQL.MYSQLDATABASE}}
+      DB_USERNAME=${{MySQL.MYSQLUSER}}
+      DB_PASSWORD=${{MySQL.MYSQLPASSWORD}}
+      SESSION_DRIVER=database
+      SESSION_LIFETIME=120
+      SESSION_SECURE_COOKIE=true
+      SESSION_HTTP_ONLY=true
+      SESSION_SAME_SITE=lax
+      CACHE_STORE=database
+      QUEUE_CONNECTION=sync
+      BCRYPT_ROUNDS=12
+
+    (Alternatif: satu variabel DB_URL dari service MySQL; Laravel mendukung
+    DB_URL. Utamakan koneksi private network antar service, bukan URL publik.)
+ 5. Settings -> Networking -> Generate Domain. Salin URL, isi ke APP_URL.
+ 6. Perintah migrasi: set Pre-deploy / Release command atau start command:
+        php artisan migrate --force
+    Seed data demo SEKALI SAJA: jalankan `php artisan db:seed --force` lewat
+    pre-deploy command pada deploy pertama (seeder sudah idempotent), lalu
+    hapus dari command agar tidak diulang. Alternatif: Railway CLI / konsol
+    service untuk menjalankan perintah satu kali.
+ 7. Optimasi (opsional, setelah env terisi): 
+        php artisan config:cache && php artisan route:cache && php artisan view:cache
+ 8. Healthcheck path: /up (route bawaan Laravel di bootstrap/app.php).
+ 9. Pastikan trustProxies(at: '*') sudah ada, supaya Laravel tahu request
+    aslinya HTTPS (cookie secure, URL asset/redirect benar).
+10. Buka URL -> uji: login 3 role, register akun baru, CRUD produk, stok OUT
+    melebihi stok (harus ditolak), cek 403 dengan akun staff, cek halaman 404.
+11. Ambil screenshot bukti (dashboard live, deployment logs sukses, env
+    variables dengan nilai rahasia disamarkan).
+
+KENDALA UMUM RAILWAY (bahan esai troubleshooting):
+  - 500 setelah deploy -> APP_KEY kosong / DB env salah. Cek deploy logs.
+  - "SQLSTATE connection refused" -> DB_HOST salah / service MySQL belum siap.
+  - Redirect loop / URL http -> trustProxies belum diset.
+  - Tabel sessions tidak ada -> migrate belum jalan.
+  - Data hilang tiap deploy -> jangan simpan data di filesystem (kita pakai MySQL).
+  - Seeder jalan berulang -> duplikat: pastikan idempotent / hapus dari command.
+
+PLAN B (jika Railway bermasalah): Render (Web Service Docker) + MySQL eksternal
+(mis. layanan MySQL terkelola/trial lain), atau VPS (Nginx + PHP-FPM + MySQL,
+git pull, composer install --no-dev, php artisan migrate --force). Putuskan
+paling lambat Sabtu siang; jangan menunggu Minggu malam.
+
+
+================================================================================
+16. TEMPLATE README.md
+================================================================================
+(Salin ke README.md di root repo; isi bagian TODO.)
+
+---------------------------------- BEGIN README ----------------------------------
+# GudangKu - Sistem Manajemen Inventaris Gudang
+
+Aplikasi web full-stack berbasis server-side untuk mengelola inventaris
+gudang: master barang, kategori, pemasok, stok masuk/keluar, stock opname,
+laporan, dan dashboard, dengan kontrol akses berbasis peran.
+
+Dibuat untuk UAS Web Application Development - Universitas Cakrawala.
+Nama: TODO | NIM: TODO
+
+- Live App : TODO https://....up.railway.app
+- Repository: TODO https://github.com/....
+- Video Demo: TODO
+
+## Fitur Utama
+- Autentikasi (registrasi, login, logout) + manajemen session (database)
+- RBAC 3 peran: Admin, Manager, Staff (middleware + policy)
+- CRUD: Produk, Kategori, Pemasok, User
+- Transaksi stok: masuk, keluar, penyesuaian (atomik, tidak boleh negatif)
+- Riwayat transaksi, laporan stok & transaksi (export CSV)
+- Dashboard ringkasan + grafik, stok menipis
+- Activity log (audit trail)
+- Keamanan: CSRF, XSS escaping + sanitasi, prepared statements, throttling
+
+## Tech Stack
+Laravel (MVC), PHP, MySQL, Blade, Bootstrap 5, Chart.js, Eloquent ORM &
+Query Builder, PHPUnit.
+
+## Prasyarat
+- PHP (sesuai composer.json) dengan ekstensi: pdo_mysql, mbstring, openssl,
+  tokenizer, xml, ctype, json, bcmath, fileinfo
+- Composer 2.x
+- MySQL 8+ (XAMPP / Laragon / Docker)
+- Git
+- (Opsional) Node.js bila ingin menjalankan build aset
+
+## Instalasi Lokal
+1. Clone repo
+       git clone TODO_URL gudangku
+       cd gudangku
+2. Install dependency
+       composer install
+3. Salin environment & generate key
+       cp .env.example .env        (Windows: copy .env.example .env)
+       php artisan key:generate
+4. Buat database MySQL kosong bernama `gudangku` (dan `gudangku_test` untuk tes)
+       CREATE DATABASE gudangku CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+5. Atur kredensial DB di .env (DB_USERNAME, DB_PASSWORD).
+6. Siapkan database - PILIH SALAH SATU:
+   a. (Disarankan) migrasi + seed:
+          php artisan migrate --seed
+   b. Import file SQL:
+          mysql -u root -p gudangku < database/gudangku.sql
+7. Jalankan server
+       php artisan serve
+   Buka http://127.0.0.1:8000
+
+## Akun Demo
+| Role    | Email                  | Password      |
+|---------|------------------------|---------------|
+| Admin   | admin@gudangku.test    | Admin@12345   |
+| Manager | manager@gudangku.test  | Manager@12345 |
+| Staff   | staff@gudangku.test    | Staff@12345   |
+(Registrasi akun baru otomatis berperan Staff.)
+
+## Hak Akses
+(Tempel tabel RBAC Bagian 4)
+
+## Struktur Direktori Ringkas
+(Tempel struktur folder Bagian 6.5)
+
+## Skema Database
+(Tempel gambar ERD atau link docs/ERD.md)
+
+## Menjalankan Tes
+       php artisan test
+(Memerlukan database MySQL `gudangku_test`.)
+
+## Deployment (Railway)
+(Ringkas langkah Bagian 15 + daftar environment variables tanpa nilai rahasia)
+
+## Keamanan
+CSRF token di semua form, output di-escape Blade + sanitasi input, query
+terparameter (Eloquent/Query Builder), password di-hash bcrypt, session
+database dengan regenerate saat login, rate limit login, security headers.
+
+## Troubleshooting
+- "No application encryption key" -> php artisan key:generate
+- "SQLSTATE[HY000] [2002]" -> cek MySQL berjalan & DB_HOST/PORT di .env
+- "Access denied for user" -> cek DB_USERNAME/DB_PASSWORD
+- Tabel tidak ada -> php artisan migrate
+- Perubahan .env tidak terbaca -> php artisan config:clear
+- 419 Page Expired -> sesi/token kedaluwarsa, muat ulang halaman
+
+## Lisensi / Catatan
+Proyek akademik individu. TODO
+----------------------------------- END README -----------------------------------
+
+
+================================================================================
+17. TEMPLATE .env.example
+================================================================================
+APP_NAME=GudangKu
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+APP_LOCALE=id
+APP_FALLBACK_LOCALE=en
+APP_TIMEZONE=Asia/Jakarta
+
+LOG_CHANNEL=stack
+LOG_LEVEL=debug
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=gudangku
+DB_USERNAME=root
+DB_PASSWORD=
+
+SESSION_DRIVER=database
+SESSION_LIFETIME=120
+SESSION_ENCRYPT=false
+SESSION_HTTP_ONLY=true
+SESSION_SAME_SITE=lax
+SESSION_SECURE_COOKIE=false
+
+CACHE_STORE=database
+QUEUE_CONNECTION=sync
+BCRYPT_ROUNDS=12
+
+(Production: APP_ENV=production, APP_DEBUG=false, SESSION_SECURE_COOKIE=true,
+ LOG_CHANNEL=stderr. Pastikan config/app.php membaca APP_TIMEZONE.)
+
+
+================================================================================
+18. DELIVERABLES: PDF, VIDEO, SUBMISSION
+================================================================================
+Ada 4 deliverable + 1 dokumen final (semua tautan/isi dirangkum dalam 1 PDF).
+
+--- 18.1 Deliverable 1: Source code ---
+  Repo GitHub (publik, atau private + beri akses) berisi: seluruh kode php,
+  database/gudangku.sql, .env.example, README.md. Di PDF final cantumkan
+  link repo + lampiran ringkas (README, .env.example, daftar file kunci).
+  Cek template submission dosen: jika diminta isi kode di dalam PDF,
+  lampirkan cuplikan file utama (routes/web.php, StockService, AuthController,
+  salah satu FormRequest, migration utama) dalam lampiran.
+
+--- 18.2 Deliverable 2: Live URL ---
+  URL Railway. Uji dari jaringan/HP lain. Jangan matikan sampai penilaian.
+
+--- 18.3 Deliverable 3: PDF ringkas "Presentasi & Demo" ---
+  Isi wajib (urut seperti soal):
+   1. Nama & deskripsi project            (Bagian 3 bagian atas)
+   2. Design ERD                           (gambar dari Bagian 5.1 + penjelasan relasi)
+   3. Flowchart / diagram alur aplikasi    (Bagian 6.2 + 6.3)
+   4. Struktur directory / struktur MVC    (Bagian 6.5 + peta M-V-C)
+   5. Rincian hak guna akses pengguna      (matriks Bagian 4)
+   6. Daftar fitur aplikasi                (Bagian 3)
+   7. Screenshot fitur aplikasi            (min. 12-15: login, register,
+      dashboard 3 role, produk list/form, stok in/out, error stok kurang,
+      riwayat, laporan, user mgmt, activity log, 403, 419)
+   8. Deployment step                      (Bagian 15 + screenshot Railway)
+  Tambahan nilai: halaman "Keamanan" (tabel ancaman-mitigasi Bagian 8) dan
+  "Testing" (hasil php artisan test + QA manual).
+  Link video presentasi dicantumkan di PDF ini.
+
+--- 18.4 Deliverable 4: Esai (video) ---
+  Jawab semua pertanyaan di dokumen esai (link di soal) dalam video.
+  Lihat Bagian 19 untuk persiapan. Unggah (YouTube Unlisted / Google Drive
+  "Anyone with the link"). TES buka link dari akun lain/incognito.
+
+--- 18.5 Final Submission Document (1 PDF) ---
+  Gunakan TEMPLATE SUBMISSION UAS dari dosen (link di soal). Isi:
+   - Identitas mahasiswa (nama, NIM, kelas, mata kuliah)
+   - Informasi project (nama, deskripsi, studi kasus: Inventaris Gudang)
+   - Jawaban esai (ringkasan + link video esai)
+   - Link aplikasi (live)
+   - Link repository
+   - Link video presentasi/demo
+   - Lampiran (PDF ringkas deliverable 3 digabung / dilampirkan)
+  Nama file: nim-nama-aplikasi.pdf. Unggah via Google Form di soal.
+  Kumpulkan SEBELUM Minggu 1 Nov 2026 pukul 23.59 WIB (target 18.00).
+
+--- 18.6 Script video presentasi & demo (target 8-10 menit) ---
+  00:00-00:45  Perkenalan: nama, NIM, nama app, masalah yang diselesaikan.
+  00:45-02:00  Desain: ERD (jelaskan relasi), arsitektur MVC, alur request.
+  02:00-03:00  Struktur folder + tech stack + kenapa Service layer.
+  03:00-07:00  DEMO LIVE (di URL production): login admin -> dashboard ->
+               CRUD produk -> stok masuk -> stok keluar (sukses, lalu
+               gagal karena stok kurang) -> riwayat -> laporan/export ->
+               kelola user. Login staff -> tunjukkan menu terbatas & 403.
+  07:00-08:30  Keamanan: tunjukkan @csrf & 419, escaping XSS, throttling,
+               kode FormRequest & middleware role.
+  08:30-09:30  Deployment: Railway, env vars (samarkan secret), logs.
+  09:30-10:00  Penutup + hasil test + link.
+
+--- 18.7 Format video esai ---
+  Jawab pertanyaan satu per satu, tampilkan layar (kode/diagram) saat menjelaskan.
+  Hindari membaca naskah kaku; pahami konsepnya. Durasi menyesuaikan jumlah
+  pertanyaan. Wajah/suara jelas. Tunjukkan commit history Git sebentar sebagai
+  bukti orisinalitas.
+
+
+================================================================================
+19. PERSIAPAN ESAI (25%)
+================================================================================
+Rubrik esai menilai tiga kelompok:
+  (1) alur data, pattern MVC, struktur database
+  (2) logika backend, penanganan error, implementasi sekuriti
+  (3) langkah deployment, konfigurasi environment, troubleshooting
+
+TODO: cocokkan dengan pertanyaan asli di dokumen esai. Di bawah ini
+pertanyaan antisipasi + poin jawaban.
+
+--- Kelompok 1: Alur data, MVC, database ---
+Q1. Jelaskan alur data dari klik tombol sampai data masuk database.
+    -> Request lifecycle Bagian 6.2/6.3: route -> middleware -> controller ->
+       FormRequest -> Service -> Eloquent/PDO -> MySQL -> redirect -> view.
+Q2. Apa itu MVC dan di mana tiap bagiannya di proyekmu?
+    -> Model = app/Models (relasi, aturan data); View = resources/views Blade
+       (tanpa logika bisnis); Controller = app/Http/Controllers (koordinator
+       tipis). Tambahan: FormRequest (validasi), Service (logika stok), Policy.
+Q3. Kenapa ada Service layer? 
+    -> Logika stok dipakai oleh 3 controller + seeder; satu sumber kebenaran;
+       mudah dites; controller tipis.
+Q4. Jelaskan ERD dan relasinya, kenapa dinormalisasi begini?
+    -> 1-N kategori->produk, pemasok->produk, produk->transaksi, user->
+       transaksi/log. Normalisasi: tidak menyimpan nama kategori di produk.
+       Denormalisasi terkontrol: products.stock sebagai cache saldo + 
+       stock_before/after di transaksi untuk audit & kinerja.
+Q5. Kenapa stok disimpan di products dan juga ada tabel transaksi?
+    -> Baca stok cepat (tanpa SUM tiap kali) + ledger untuk jejak audit;
+       konsistensi dijaga transaksi DB + lock.
+Q6. Eloquent vs Query Builder, kapan dipakai?
+    -> Eloquent untuk CRUD/relasi/eager loading; Query Builder untuk agregasi
+       laporan/dashboard (groupBy, sum) yang lebih ringan.
+Q7. Apa itu migration & seeder, kenapa penting?
+    -> Skema sebagai kode (versi, reproducible, tim); seeder untuk data demo.
+Q8. Apa itu N+1 dan bagaimana mencegahnya?
+    -> with('category','supplier') pada index produk.
+Q9. Jelaskan foreign key & aksi onDelete yang kamu pilih.
+    -> restrict pada kategori/produk (jaga integritas), set null pada pemasok
+       (histori tetap).
+
+--- Kelompok 2: Backend, error, sekuriti ---
+Q10. Bagaimana mencegah stok negatif dan race condition?
+    -> DB::transaction + lockForUpdate (row lock), cek stok di service,
+       exception domain, rollback otomatis.
+Q11. Bagaimana validasi dilakukan dan kenapa server-side?
+    -> FormRequest; client-side bisa dibypass; validated() hanya data valid.
+Q12. Bagaimana CSRF dicegah? Apa yang terjadi tanpa token?
+    -> Token per sesi di @csrf, dicek VerifyCsrfToken; tanpa token -> 419.
+Q13. Bagaimana XSS dicegah?
+    -> Escape output Blade {{ }}, strip_tags saat input, tanpa {!! !!},
+       @json untuk JS, header nosniff.
+Q14. SQL Injection? 
+    -> PDO prepared statements lewat Eloquent/QB; tidak ada concat input;
+       whitelist sorting.
+Q15. Bagaimana autentikasi & session bekerja?
+    -> Auth::attempt (cek hash bcrypt), session ID di cookie httpOnly, data
+       sesi di tabel sessions, regenerate saat login (anti fixation),
+       invalidate saat logout.
+Q16. Bagaimana RBAC diterapkan? Apa bedanya middleware dan policy?
+    -> Middleware: gerbang per-route berdasar role; Policy: aturan per-aksi
+       & per-record (mis. admin tak boleh hapus diri sendiri).
+Q17. Bagaimana error ditangani?
+    -> Validasi (redirect+pesan), exception domain, FK constraint ramah,
+       log error, halaman error kustom, APP_DEBUG=false di production.
+Q18. Kenapa registrasi selalu role staff?
+    -> Cegah privilege escalation/mass assignment; admin yang mengubah role.
+Q19. Kenapa transaksi stok tidak bisa diedit/dihapus?
+    -> Integritas audit (ledger); koreksi via adjustment yang tercatat.
+Q20. Bagaimana kamu memastikan kode orisinal & kamu paham?
+    -> Commit history bertahap, AI dipakai sebagai asisten dengan rules,
+       setiap fase direview & dijelaskan ulang, tes ditulis & dijalankan.
+       (Jawab JUJUR soal penggunaan AI; soal mengizinkan asal paham.)
+
+--- Kelompok 3: Deployment, env, troubleshooting ---
+Q21. Langkah deployment? -> Bagian 15.
+Q22. Fungsi .env & kenapa tidak di-commit? 
+    -> Konfigurasi per-lingkungan + secret; .env.example sebagai template.
+Q23. APP_KEY untuk apa? -> Enkripsi cookie/sesi terenkripsi; tanpa itu error.
+Q24. Perbedaan lokal vs production? 
+    -> APP_DEBUG false, cookie secure, log stderr, DB managed, HTTPS via proxy,
+       cache config/route/view.
+Q25. Masalah yang kamu temui saat deploy & solusinya? 
+    -> Siapkan 2-3 cerita NYATA dari pengalamanmu (catat selama mengerjakan!).
+       Contoh: trustProxies, DB env reference, seeder duplikat, migrate lupa.
+Q26. Bagaimana menjaga data tidak hilang saat redeploy? -> DB terpisah (MySQL
+     service), tidak simpan state di filesystem container.
+
+TIPS: buat file `docs/catatan-troubleshooting.md` sejak sekarang dan catat
+SETIAP error yang kamu temui beserta solusinya. Itu bahan esai paling otentik.
+
+
+================================================================================
+20. TIMELINE (29 OKT - 1 NOV 2026)
+================================================================================
+Asumsi: ~6-8 jam kerja efektif per hari. Sesuaikan, tapi pertahankan urutan.
+
+HARI 1 - KAMIS 29 OKT (Fondasi)
+  [ ] Baca soal & project.txt, buka link esai, catat pertanyaan
+  [ ] Fase 0 (setup, GitHub, rules)  [ ] Fase 1 (DB, model, seeder)
+  [ ] Fase 2 (auth manual + session + RBAC middleware)
+  [ ] Fase 3 (layout & UI dasar)
+  Target malam: bisa register/login/logout, 3 role, DB ter-seed, ada commit.
+  [ ] Mulai catatan troubleshooting.
+
+HARI 2 - JUMAT 30 OKT (Inti aplikasi)
+  [ ] Fase 4 (CRUD kategori, pemasok, produk)
+  [ ] Fase 5 (StockService + transaksi + seeder transaksi)
+  [ ] Fase 6 (dashboard)
+  Target malam: semua P0 berfungsi lokal. Commit rapi. (Opsional: coba deploy
+  awal agar masalah infrastruktur ketahuan lebih cepat.)
+
+HARI 3 - SABTU 31 OKT (Lengkapi, aman, rilis)
+  Pagi : Fase 7 (user mgmt, profil, laporan, activity log) [P1]
+  Siang: Fase 8 (hardening) + Fase 9 (testing)
+  Sore : Fase 10 (README, .env.example, .sql) + Fase 11 (DEPLOY)
+  Malam: uji live URL penuh, screenshot semua fitur, bikin diagram final
+         (ERD, flowchart), review kode keseluruhan dengan PROMPT REVIEW.
+  Keputusan Plan B deploy paling lambat Sabtu siang.
+
+HARI 4 - MINGGU 1 NOV (Dokumen & video; JANGAN koding fitur baru)
+  Pagi : Bug fix kritis saja. Freeze kode (tag v1.0).
+  Siang: Rekam video presentasi/demo, rekam video esai (latihan dulu sekali).
+         Unggah video, tes link.
+  Sore : Susun PDF ringkas + Final Submission Document, cek nama file.
+  18.00: SUBMIT via Google Form. Sisakan buffer sampai 23.59 untuk masalah.
+
+JIKA TERLAMBAT: potong dari bawah: G (P2) -> grafik -> activity log ->
+laporan CSV -> profil. JANGAN potong: auth, RBAC, CRUD, StockService,
+validasi, CSRF/XSS, deployment, README, esai.
+
+
+================================================================================
+21. CHECKLIST FINAL SEBELUM SUBMIT
+================================================================================
+DESAIN (15%)
+  [ ] ERD jelas, >= 4 tabel berelasi (kita 6+), PK/FK/tipe tampak
+  [ ] Diagram arsitektur/request lifecycle ada
+  [ ] Tabel routing + struktur MVC ada di PDF
+
+IMPLEMENTASI (35%)
+  [ ] migrate:fresh --seed berjalan bersih di lokal & production
+  [ ] CRUD penuh: produk, kategori, pemasok, user (create/read/update/delete)
+  [ ] Eloquent (relasi, eager loading, scope) + Query Builder (dashboard)
+  [ ] StockService atomik, stok tidak bisa negatif
+  [ ] Pagination, search, filter berfungsi
+  [ ] File database/gudangku.sql ada & bisa di-import
+  [ ] Tidak ada dd()/dump/console.log/kode mati; tidak ada package asing
+
+KEAMANAN (15%)
+  [ ] Semua form @csrf; tes 419
+  [ ] Tidak ada {!! !!} untuk data user; XSS test lolos
+  [ ] Tidak ada raw SQL berisi input; sorting whitelist
+  [ ] Register/Login/Logout + session regenerate/invalidate
+  [ ] Throttle login; akun nonaktif ditolak
+  [ ] RBAC: middleware + policy; tes akses lintas role
+  [ ] Validasi server-side ketat via FormRequest
+  [ ] APP_DEBUG=false di production; .env tidak ter-commit
+
+DEPLOYMENT (10%)
+  [ ] URL live aktif, HTTPS, MySQL production, data seed ada
+  [ ] Akun demo di README bisa login di live
+  [ ] Langkah deployment tertulis (PDF + README)
+
+ESAI (25%)
+  [ ] Semua pertanyaan dijawab dalam video, tampilkan kode/diagram
+  [ ] Menjelaskan alur data, MVC, DB; backend, error, sekuriti; deployment, env, troubleshooting
+  [ ] Bisa menunjukkan commit history
+
+DELIVERABLES
+  [ ] Repo (README, .env.example, .sql) - repo bisa diakses dosen
+  [ ] Link live app
+  [ ] Video presentasi/demo (link bisa dibuka tanpa login/izin)
+  [ ] Video esai (link bisa dibuka)
+  [ ] PDF ringkas (8 komponen) + Final Submission (1 PDF, template dosen)
+  [ ] Nama file nim-nama-aplikasi
+  [ ] Diunggah via Google Form sebelum Minggu 1 Nov 2026 23.59 WIB
+
+
+================================================================================
+22. TROUBLESHOOTING UMUM
+================================================================================
+Lokal
+  - "could not find driver" -> aktifkan ekstensi pdo_mysql di php.ini.
+  - "Access denied for user 'root'" -> sesuaikan DB_USERNAME/DB_PASSWORD.
+  - "Base table or view not found: sessions" -> php artisan migrate.
+  - "Class not found" setelah buat file -> composer dump-autoload.
+  - Perubahan .env tak berlaku -> php artisan config:clear.
+  - Route tidak ketemu -> php artisan route:list, route:clear.
+  - View lama muncul -> php artisan view:clear.
+  - 419 saat submit -> lupa @csrf atau sesi habis.
+  - Tes gagal karena DB -> pastikan gudangku_test ada & phpunit.xml pakai mysql.
+  - MySQL strict mode error -> cek tipe data/panjang kolom vs input.
+AI / Antigravity
+  - AI memakai sintaks Laravel lama (Kernel.php, $routeMiddleware) -> ingatkan
+    versi Laravel di composer.json & rules; minta cek dokumentasi.
+  - AI memasang package/starter kit -> tolak, revert, rujuk rules file 00.
+  - AI mengubah banyak file di luar fase -> git diff, revert yang di luar scope.
+  - Kode terlalu rumit untuk kamu jelaskan -> minta disederhanakan sebelum commit.
+  - Konteks membengkak/halusinasi -> buka chat baru per fase, tempel ringkasan
+    keputusan + path file relevan.
+Production
+  - Lihat bagian "Kendala umum Railway" di Bagian 15.
+
+================================================================================
+PENUTUP
+================================================================================
+Prinsip utama: sedikit fitur tapi benar, aman, ter-deploy, terdokumentasi, dan
+bisa kamu jelaskan, mengalahkan banyak fitur yang kamu sendiri tidak paham.
+Urutan prioritas jika waktu mepet: P0 lengkap -> deploy -> dokumen/video ->
+baru P1. Setelah tiap fase: EXPLAIN -> uji -> commit.
+
+Semangat, dan sukses UAS-nya!
