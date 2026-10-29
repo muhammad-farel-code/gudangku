@@ -67,22 +67,34 @@ class ProductController extends Controller
     }
 
     /**
-     * Simpan produk baru ke database (dengan initial_stock jika diisi).
+     * Simpan produk baru ke database (dengan initial_stock yang terhubung ke StockService).
      */
-    public function store(StoreProductRequest $request): RedirectResponse
+    public function store(StoreProductRequest $request, \App\Services\StockService $stockService): RedirectResponse
     {
         Gate::authorize('create', Product::class);
 
         $validated = $request->validated();
 
-        // Tangani initial_stock (default 0)
         $initialStock = (int) ($validated['initial_stock'] ?? 0);
-        $validated['stock'] = $initialStock;
         unset($validated['initial_stock']);
 
+        // Set stok awal produk = 0, lalu mutasi melalui StockService jika ada initial_stock
+        $validated['stock'] = 0;
         $product = Product::create($validated);
 
         ActivityLogger::log('create', "Menambahkan produk baru: {$product->name} (SKU: {$product->sku})", $product);
+
+        // Aturan: Initial stock dicatat sebagai transaksi stok masuk dengan catatan 'Stok awal'
+        if ($initialStock > 0) {
+            $stockService->stockIn(
+                product: $product,
+                quantity: $initialStock,
+                user: $request->user(),
+                supplierId: $product->supplier_id,
+                notes: 'Stok awal',
+                date: now()->toDateString()
+            );
+        }
 
         return redirect()->route('products.index')
             ->with('success', "Produk '{$product->name}' berhasil ditambahkan.");
