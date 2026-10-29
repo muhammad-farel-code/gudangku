@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             CategorySeeder::class,
             SupplierSeeder::class,
             ProductSeeder::class,
-            // TransactionSeeder DITUNDA sampai Fase 5 (StockService telah tersedia)
+            TransactionSeeder::class,
         ]);
     }
 }

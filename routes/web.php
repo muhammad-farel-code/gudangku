@@ -46,4 +46,21 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::resource('categories', CategoryController::class)->only(['index', 'show']);
     Route::resource('suppliers', SupplierController::class)->only(['index', 'show']);
     Route::resource('products', ProductController::class)->only(['index', 'show']);
+
+    // --- Transaksi Stok (Penyesuaian: Khusus Manager & Admin) ---
+    Route::middleware('role:admin,manager')->group(function () {
+        Route::get('/stock/adjustment', [\App\Http\Controllers\StockAdjustmentController::class, 'create'])->name('stock.adjustment');
+        Route::post('/stock/adjustment', [\App\Http\Controllers\StockAdjustmentController::class, 'store'])->name('stock.adjustment.store');
+    });
+
+    // --- Transaksi Stok (Masuk & Keluar: Semua role login) ---
+    Route::get('/stock/in', [\App\Http\Controllers\StockInController::class, 'create'])->name('stock.in');
+    Route::post('/stock/in', [\App\Http\Controllers\StockInController::class, 'store'])->name('stock.in.store');
+
+    Route::get('/stock/out', [\App\Http\Controllers\StockOutController::class, 'create'])->name('stock.out');
+    Route::post('/stock/out', [\App\Http\Controllers\StockOutController::class, 'store'])->name('stock.out.store');
+
+    // --- Riwayat & Detail Transaksi (Read-Only / Immutable: Semua role login) ---
+    Route::get('/transactions', [\App\Http\Controllers\StockTransactionController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{stockTransaction}', [\App\Http\Controllers\StockTransactionController::class, 'show'])->name('transactions.show');
 });
