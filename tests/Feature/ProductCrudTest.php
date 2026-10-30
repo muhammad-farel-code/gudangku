@@ -290,4 +290,23 @@ class ProductCrudTest extends TestCase
             'action' => 'delete',
         ]);
     }
+
+    public function test_cannot_delete_category_that_contains_products_br5(): void
+    {
+        Product::create([
+            'category_id' => $this->category->id,
+            'sku' => 'PRD-IN-CAT',
+            'name' => 'Produk Dalam Kategori',
+            'unit' => 'pcs',
+            'purchase_price' => 20000,
+            'selling_price' => 30000,
+            'stock' => 5,
+            'min_stock' => 1,
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('categories.destroy', $this->category));
+
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('categories', ['id' => $this->category->id]);
+    }
 }
