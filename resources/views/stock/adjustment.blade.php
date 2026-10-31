@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Penyesuaian Stok (Stock Opname)')
+@section('page_title', 'Penyesuaian Stok')
+
+@section('page_actions')
+    <x-back-button :route="route('transactions.index')" />
+@endsection
 
 @section('content')
 <div class="mb-4">
@@ -15,9 +20,6 @@
             <h1 class="h3 fw-bold mb-1">Penyesuaian Stok (Opname)</h1>
             <p class="text-secondary mb-0">Sinkronkan catatan stok sistem dengan hasil penghitungan fisik nyata di gudang penyimpanan.</p>
         </div>
-        <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-light rounded-pill px-3">
-            <i class="bi bi-clock-history me-1"></i> Lihat Riwayat
-        </a>
     </div>
 </div>
 

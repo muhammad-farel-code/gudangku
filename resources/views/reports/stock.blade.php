@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Laporan Stok Inventaris')
+@section('page_title', 'Laporan Stok')
 
 @section('content')
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">

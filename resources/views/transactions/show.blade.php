@@ -1,6 +1,16 @@
 @extends('layouts.app')
 
 @section('title', 'Bukti Transaksi: ' . $stockTransaction->reference_no)
+@section('page_title', 'Detail Transaksi')
+
+@section('page_actions')
+    <div class="d-flex gap-2">
+        <x-back-button :route="route('transactions.index')" />
+        <button type="button" class="btn btn-gk-dark" onclick="window.print()">
+            <i class="bi bi-printer me-1"></i> Cetak Bukti
+        </button>
+    </div>
+@endsection
 
 @section('content')
 <div class="mb-4">
@@ -32,14 +42,6 @@
                 Tanggal Transaksi: <strong class="text-dark">{{ $stockTransaction->transaction_date->format('d F Y') }}</strong> &bull; 
                 Dicatat Pada: <span class="text-dark">{{ $stockTransaction->created_at->format('d/m/Y H:i:s') }} WIB</span>
             </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('transactions.index') }}" class="btn btn-light rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat
-            </a>
-            <button type="button" class="btn btn-dark gk-btn-pill px-3" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i> Cetak Bukti
-            </button>
         </div>
     </div>
 </div>

@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Tambah Pengguna Baru')
+@section('page_title', 'Tambah Pengguna')
+
+@section('page_actions')
+    <x-back-button :route="route('users.index')" />
+@endsection
 
 @section('content')
 <div class="mb-4">

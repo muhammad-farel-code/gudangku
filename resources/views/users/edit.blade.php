@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Edit Pengguna: ' . $user->name)
+@section('page_title', 'Edit Pengguna')
+
+@section('page_actions')
+    <x-back-button :route="route('users.index')" />
+@endsection
 
 @section('content')
 <div class="mb-4">
@@ -15,9 +20,6 @@
             <h1 class="h3 fw-bold mb-1">Edit Pengguna</h1>
             <p class="text-secondary mb-0">Perbarui profil, peran otorisasi, atau status akses operasional pengguna.</p>
         </div>
-        <a href="{{ route('users.index') }}" class="btn btn-sm btn-light rounded-pill px-3">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-        </a>
     </div>
 </div>
 

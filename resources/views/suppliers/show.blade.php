@@ -5,9 +5,7 @@
 
 @section('page_actions')
     <div class="d-flex gap-2">
-        <a href="{{ route('suppliers.index') }}" class="btn btn-gk-outline">
-            <i class="bi bi-arrow-left me-1"></i> Kembali
-        </a>
+        <x-back-button :route="route('suppliers.index')" />
         @can('update', $supplier)
             <a href="{{ route('suppliers.edit', $supplier) }}" class="btn btn-gk-dark">
                 <i class="bi bi-pencil me-1"></i> Ubah Data

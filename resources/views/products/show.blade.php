@@ -1,6 +1,22 @@
 @extends('layouts.app')
 
 @section('title', 'Detail Produk: ' . $product->name)
+@section('page_title', 'Detail Produk')
+
+@section('page_actions')
+    <div class="d-flex gap-2">
+        <x-back-button :route="route('products.index')" />
+        @if(Auth::user()->hasRole('admin', 'manager'))
+            <a href="{{ route('products.edit', $product) }}" class="btn btn-gk-dark">
+                <i class="bi bi-pencil me-1"></i> Edit Produk
+            </a>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-3" 
+                    onclick="confirmDelete('{{ route('products.destroy', $product) }}', 'produk {{ $product->name }} (SKU: {{ $product->sku }})')">
+                <i class="bi bi-trash me-1"></i> Hapus
+            </button>
+        @endif
+    </div>
+@endsection
 
 @section('content')
 <div class="mb-4">
@@ -25,20 +41,6 @@
                 Kategori: <strong class="text-dark">{{ $product->category->name ?? '—' }}</strong> &bull; 
                 Pemasok: <strong class="text-dark">{{ $product->supplier->name ?? 'Tanpa Pemasok' }}</strong>
             </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('products.index') }}" class="btn btn-light rounded-pill px-3">
-                <i class="bi bi-arrow-left me-1"></i> Kembali
-            </a>
-            @if(Auth::user()->hasRole('admin', 'manager'))
-                <a href="{{ route('products.edit', $product) }}" class="btn btn-dark gk-btn-pill px-3">
-                    <i class="bi bi-pencil me-1"></i> Edit Produk
-                </a>
-                <button type="button" class="btn btn-outline-danger rounded-pill px-3" 
-                        onclick="confirmDelete('{{ route('products.destroy', $product) }}', 'produk {{ $product->name }} (SKU: {{ $product->sku }})')">
-                    <i class="bi bi-trash me-1"></i> Hapus
-                </button>
-            @endif
         </div>
     </div>
 </div>

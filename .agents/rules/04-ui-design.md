@@ -36,20 +36,19 @@ Tipografi:
   label kecil 12-13px warna muted.
 
 ## Struktur layout (layouts/app.blade.php)
-1. Body gelap (--gk-bg). Sidebar kiri gelap, lebar ~240px, sticky.
-   - Atas: logo kotak lime + teks "GudangKu".
-   - Grup label kecil kapital "MENU" lalu item; grup "GENERAL" (Profil, dll.).
-   - Item aktif: teks putih + penanda vertikal/indikator lime di kiri.
-   - Bawah: kartu user (avatar inisial, nama, role).
-2. Konten: SATU panel putih membulat besar di sebelah sidebar (margin kecil
-   dari tepi), berisi topbar + isi halaman.
-3. Topbar: judul halaman (kiri), search pill (tengah, opsional), tombol
-   filter ikon, ikon notifikasi, dan tombol aksi utama pill GELAP di kanan
-   (mis. "Tambah Produk +").
-4. Mobile (<992px): sidebar jadi offcanvas, panel konten penuh lebar.
+1. Body gelap (--gk-bg). Sidebar kiri gelap, lebar 250px, position sticky, tinggi 100vh, flex column.
+   - Atas: logo kotak lime + teks "GudangKu" (flex-shrink: 0).
+   - Tengah: daftar menu scrollable sendiri (`.gk-sidebar-nav-container`, overflow-y: auto, scrollbar tipis). Tinggi tiap item menu sekitar 42-44px dengan spasi rapat agar menu admin (11 item) muat pada layar tinggi ~880px tanpa scroll.
+   - Item aktif: teks putih + latar #232328 + penanda vertikal/indikator lime di kiri.
+   - Bawah: Blok GENERAL menempel di bawah sidebar (`margin-top: auto; flex-shrink: 0`), berisi label "GENERAL", menu "Profil Saya", dan kartu user tepat di bawahnya.
+   - Kartu User & Logout: avatar inisial, nama (dengan ellipsis), dan role tampil UTUH (tidak boleh terpotong). Menu "Keluar" DITIADAKAN dari daftar link teks GENERAL; saat kartu user diklik, muncul dropdown/dropup kecil (`data-bs-popper-config='{"strategy":"fixed"}'`, buka ke atas/samping). Dropdown berisi info akun, menu profil, divider, dan form POST ke `route('logout')` dengan `@csrf` dan tombol submit merah. Dropdown menutup saat klik di luar atau tekan Esc, serta keyboard-accessible. Berlaku juga pada sidebar mobile offcanvas.
+2. Konten: SATU panel putih besar di sebelah sidebar. Panel menempel ke tepi kanan, atas, dan bawah viewport; radius kanan 0; radius kiri dipertahankan (24px, `border-radius: 24px 0 0 24px`). Panel memenuhi tinggi layar (`min-height: 100vh; margin: 0`) sehingga tidak ada area gelap di bawah panel pada halaman pendek.
+3. Topbar: judul halaman dinamis sesuai konteks halaman (kiri, dikirim lewat `@section('page_title')`), search pill (tengah, opsional), tombol filter ikon, ikon notifikasi, dan tombol aksi / tombol kembali di kanan atas (`@section('page_actions')`).
+4. Mobile (<992px): sidebar jadi offcanvas, panel konten penuh lebar (radius 0).
 5. Flash message: alert membulat di atas konten, ikon + warna sesuai tipe.
 
 ## Komponen
+- Tombol "Kembali" Konsisten: Semua halaman detail (show), edit, dan create (produk, kategori, pemasok, pengguna, detail transaksi, form stok masuk/keluar/penyesuaian, profil) WAJIB memiliki tombol "Kembali" seragam menggunakan komponen `<x-back-button :route="..." />` (pill outline, ikon `bi-arrow-left`) di kanan atas area judul (`@section('page_actions')`), menuju route eksplisit index induknya (bukan `history.back`).
 - Stat card: ikon dalam kotak kecil membulat (lime pada kartu gelap), label
   muted, angka besar, chip tren kecil ("+12% sejak bulan lalu" hanya bila
   data nyata dihitung; jika tidak, tampilkan keterangan netral). Kartu
@@ -59,8 +58,7 @@ Tipografi:
 - Tabel: tanpa garis vertikal, header muted 12px kapital ringan, baris tinggi
   nyaman, hover lembut, kolom aksi berisi ikon (lihat/ubah/hapus), avatar/thumb
   inisial kecil untuk nama produk.
-- Tab filter berbentuk chip pill di atas tabel (aktif = gelap/putih, lain =
-  outline). Dipakai untuk filter cepat (Semua | Stok Aman | Menipis | Habis).
+- Tab filter berbentuk chip pill di atas tabel (Semua | Menipis | Habis): Chip yang sedang dipilih/aktif WAJIB berwarna HITAM/gelap (`var(--gk-dark-card)`) dengan teks putih, chip lain outline transparan dengan border halus. Dilengkapi atribut aksesibilitas `role="tab"` dan `aria-selected` / `aria-controls`.
 - Badge status stok: Aman (hijau pastel), Menipis (kuning pastel), Habis
   (merah muda). Selalu teks + warna (bukan warna saja).
 - Form: input membulat 12px, label di atas, error merah di bawah field,
@@ -75,7 +73,7 @@ Tipografi:
 Menu sidebar (sesuai role): Dashboard, Produk, Kategori, Pemasok,
 Stok Masuk, Stok Keluar, Penyesuaian (manager/admin), Riwayat Transaksi,
 Laporan (manager/admin), Pengguna (admin), Activity Log (admin).
-GENERAL: Profil, Logout.
+GENERAL: Profil Saya, Kartu User (dengan dropdown Logout).
 
 Dashboard (mengikuti susunan gambar):
 - Baris 1 (4 stat card): [gelap] Total Produk | Total Unit Stok |

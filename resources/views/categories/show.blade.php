@@ -5,9 +5,7 @@
 
 @section('page_actions')
     <div class="d-flex gap-2">
-        <a href="{{ route('categories.index') }}" class="btn btn-gk-outline">
-            <i class="bi bi-arrow-left me-1"></i> Kembali
-        </a>
+        <x-back-button :route="route('categories.index')" />
         @can('update', $category)
             <a href="{{ route('categories.edit', $category) }}" class="btn btn-gk-dark">
                 <i class="bi bi-pencil me-1"></i> Ubah Kategori

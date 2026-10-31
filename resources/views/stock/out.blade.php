@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Pencatatan Stok Keluar (OUT)')
+@section('page_title', 'Stok Keluar')
+
+@section('page_actions')
+    <x-back-button :route="route('transactions.index')" />
+@endsection
 
 @section('content')
 <div class="mb-4">
@@ -15,9 +20,6 @@
             <h1 class="h3 fw-bold mb-1">Pencatatan Stok Keluar</h1>
             <p class="text-secondary mb-0">Catat pengeluaran barang untuk penjualan, distribusi divisi, atau keperluan operasional.</p>
         </div>
-        <a href="{{ route('transactions.index') }}" class="btn btn-sm btn-light rounded-pill px-3">
-            <i class="bi bi-clock-history me-1"></i> Lihat Riwayat
-        </a>
     </div>
 </div>
 

@@ -4,9 +4,7 @@
 @section('page_title', 'Tambah Kategori')
 
 @section('page_actions')
-    <a href="{{ route('categories.index') }}" class="btn btn-gk-outline">
-        <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-    </a>
+    <x-back-button :route="route('categories.index')" />
 @endsection
 
 @section('content')
