@@ -4,9 +4,7 @@
 @section('page_title', 'Tambah Pemasok')
 
 @section('page_actions')
-    <a href="{{ route('suppliers.index') }}" class="btn btn-gk-outline">
-        <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-    </a>
+    <x-back-button :route="route('suppliers.index')" />
 @endsection
 
 @section('content')

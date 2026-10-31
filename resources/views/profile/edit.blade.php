@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Profil Saya')
+@section('page_title', 'Pengaturan Profil')
+
+@section('page_actions')
+    <x-back-button :route="route('dashboard')" />
+@endsection
 
 @section('content')
 <div class="mb-4">

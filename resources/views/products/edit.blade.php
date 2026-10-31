@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('title', 'Edit Produk: ' . $product->name)
+@section('page_title', 'Edit Produk')
+
+@section('page_actions')
+    <x-back-button :route="route('products.index')" />
+@endsection
 
 @section('content')
 <div class="mb-4">

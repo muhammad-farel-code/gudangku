@@ -18,7 +18,7 @@
 
     <div class="app-wrapper">
         <!-- Desktop Sidebar -->
-        @include('partials.sidebar')
+        @include('partials.sidebar', ['sidebarId' => 'desktop'])
 
         <!-- Mobile Offcanvas Sidebar (<992px) -->
         <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileSidebar" style="background-color: var(--gk-bg); width: 280px;">
@@ -32,7 +32,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body p-0">
-                @include('partials.sidebar')
+                @include('partials.sidebar', ['sidebarId' => 'mobile'])
             </div>
         </div>
 
@@ -44,7 +44,7 @@
                     <button class="gk-mobile-toggle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
                         <i class="bi bi-list"></i>
                     </button>
-                    <h1 class="gk-page-title">@yield('page_title', 'Dashboard')</h1>
+                    <h1 class="gk-page-title">@yield('page_title', View::getSection('title', 'Dashboard'))</h1>
                 </div>
 
                 <div class="gk-topbar-actions">

@@ -186,23 +186,38 @@
                     <!-- Filter Chips / Tabs -->
                     <ul class="nav nav-pills gap-1 mb-3" id="productTab" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active rounded-pill px-3 py-1 text-dark small" 
-                                    id="all-tab" data-bs-toggle="pill" data-bs-target="#tab-all" type="button" role="tab"
-                                    style="background-color: #f4f4f5; font-weight: 500;">
+                            <button class="nav-link active" 
+                                    id="all-tab" 
+                                    data-bs-toggle="pill" 
+                                    data-bs-target="#tab-all" 
+                                    type="button" 
+                                    role="tab"
+                                    aria-controls="tab-all"
+                                    aria-selected="true">
                                 Semua
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill px-3 py-1 text-dark small" 
-                                    id="low-tab" data-bs-toggle="pill" data-bs-target="#tab-low" type="button" role="tab"
-                                    style="background-color: #f4f4f5; font-weight: 500;">
+                            <button class="nav-link" 
+                                    id="low-tab" 
+                                    data-bs-toggle="pill" 
+                                    data-bs-target="#tab-low" 
+                                    type="button" 
+                                    role="tab"
+                                    aria-controls="tab-low"
+                                    aria-selected="false">
                                 Menipis ({{ $lowStockProducts->count() }})
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link rounded-pill px-3 py-1 text-dark small" 
-                                    id="out-tab" data-bs-toggle="pill" data-bs-target="#tab-out" type="button" role="tab"
-                                    style="background-color: #f4f4f5; font-weight: 500;">
+                            <button class="nav-link" 
+                                    id="out-tab" 
+                                    data-bs-toggle="pill" 
+                                    data-bs-target="#tab-out" 
+                                    type="button" 
+                                    role="tab"
+                                    aria-controls="tab-out"
+                                    aria-selected="false">
                                 Habis ({{ $outOfStockProducts->count() }})
                             </button>
                         </li>

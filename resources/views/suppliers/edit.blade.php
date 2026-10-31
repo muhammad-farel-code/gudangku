@@ -1,12 +1,10 @@
 @extends('layouts.app')
 
-@section('title', 'Ubah Pemasok')
-@section('page_title', 'Ubah Pemasok')
+@section('title', 'Edit Pemasok: ' . $supplier->name)
+@section('page_title', 'Edit Pemasok')
 
 @section('page_actions')
-    <a href="{{ route('suppliers.index') }}" class="btn btn-gk-outline">
-        <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
-    </a>
+    <x-back-button :route="route('suppliers.index')" />
 @endsection
 
 @section('content')
