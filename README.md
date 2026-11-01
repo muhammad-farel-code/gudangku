@@ -3,10 +3,10 @@
 Aplikasi web *full-stack* berbasis *server-side rendering* untuk mengelola inventaris gudang secara komprehensif: master produk barang, kategori, pemasok, transaksi stok masuk/keluar, *stock opname* (penyesuaian stok), laporan mutasi, jejak audit aktivitas (*activity log*), dan dasbor analitik dengan kontrol akses berbasis peran (*Role-Based Access Control* - RBAC).
 
 Dibuat untuk memenuhi tugas **UAS Web Application Development** - Universitas Cakrawala.  
-**Nama**: Muhammad Farel | **NIM**: [TODO: Isi NIM Anda]
+**Nama**: Muhammad Farel | **NIM**: 25110300046
 
-- **Live Application**: [TODO: https://gudangku-production.up.railway.app](https://railway.app)
-- **Repository GitHub**: [https://github.com/muhammad-farel-code/gudangku](https://github.com/muhammad-farel-code/gudangku)
+- **Live Application**: https://gudangku.wasmer.app/
+- **Repository GitHub**: https://github.com/muhammad-farel-code/gudangku
 - **Video Demo & Presentasi**: [TODO: Tautan Video YouTube / Google Drive]
 
 ---
