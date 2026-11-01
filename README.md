@@ -7,8 +7,7 @@ Dibuat untuk memenuhi tugas **UAS Web Application Development** - Universitas Ca
 
 - **Live Application**: https://gudangku.wasmer.app/
 - **Repository GitHub**: https://github.com/muhammad-farel-code/gudangku
-- **Video Demo & Presentasi**: [TODO: Tautan Video YouTube / Google Drive]
-
+- **Video Demo & Presentasi**: https://drive.google.com/drive/folders/1d98D02Z14_Q26Vb9qz6l7nzBdseLpio7?usp=drive_link
 ---
 
 ## 1. Fitur Utama
