@@ -24,8 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
         ]);
 
-        // Percayai semua reverse proxies (Railway / cloud container)
-        $middleware->trustProxies(at: '*');
+        // Percayai reverse proxy: gunakan CC_REVERSE_PROXY_IPS di Clever Cloud, atau fallback '*'
+        $proxies = env('CC_REVERSE_PROXY_IPS')
+            ? array_map('trim', explode(',', (string) env('CC_REVERSE_PROXY_IPS')))
+            : '*';
+        $middleware->trustProxies(at: $proxies);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
